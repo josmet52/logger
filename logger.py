@@ -9,9 +9,9 @@ written by Joseph Metrailler in 2016-2018-2020 (pars of code form Adafruit).
     exécuté à chaque minute 24/24 365/365
 """
 
-from lib.ds18b20 import DS18B20 # import class DS18B20
-from lib.ds2413 import DS2413 # import class DS2413
-from lib.mysql_logger import Mysql # import Mysql class
+from lib.ds18b20_lib_logger import DS18B20 # import class DS18B20
+from lib.ds2413_lib_logger import DS2413 # import class DS2413
+from lib.mysql_lib_logger import Mysql # import Mysql class
 
 import time
 import datetime
@@ -35,8 +35,8 @@ class DataLogger:
         self.v_time_begin = time.time() # to calculate elapsed tiem
 
         # initialise database access
-        self.mysql_ip = "192.168.1.139"
-        self.mysql_con = Mysql(self.mysql_ip)
+        mysql_ip = "192.168.1.139"
+        self.mysql_con = Mysql(mysql_ip)
 
         # initialise temperature sensors
         self.ds18b20_array = DS18B20()
@@ -70,7 +70,7 @@ class DataLogger:
 
     def run_acquis(self):
         
-        db_connection, err = self.mysql_con.get_db_connection(False)
+        db_connection, err = self.mysql_con.get_db_connexion()
         pass_count = 1
         if not db_connection :
             while pass_count > 0:

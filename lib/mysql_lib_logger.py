@@ -139,6 +139,39 @@ class Mysql:
         
         return row
 
+    def get_temp_to_complete_graph(self, last_id):
+        
+        connect_try_count = 0
+        con = False
+        
+        while not con:
+            
+            connect_try_count += 1
+            
+            # connect the db and return the temperaures not actually on the graph (last_id = last_id on the graph)
+            con, e = self.get_db_connexion()
+            if not con:
+                if connect_try_count == 1:
+                    msg = "".join([datetime.strftime(datetime.today(), '%d-%m-%Y %H:%M:%S'), " -> Problème de connection sur la db. Le systeme tente de se reconnecter."])
+                    print(msg)
+                    logging.warning(msg)
+                msg = " ".join(["-> Essai no:", str(connect_try_count), ":", str(e[0]), "/", str(e[1])])
+                print(msg)
+                logging.warning(msg)
+                time.sleep(5)
+
+        cur = con.cursor()
+#         sql_txt = "".join(["SELECT timeStamp, id, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14 FROM tLog WHERE id > '", str(last_id), "';"])
+        sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, time_stamp, id ",
+                           "FROM tlog WHERE id > '", str(last_id), "';"])
+        print(sql_txt)
+        
+
+        cur.execute(sql_txt)
+        row = cur.fetchall()
+        
+        return row
+
 
 if __name__ == '__main__':
 
@@ -159,6 +192,10 @@ if __name__ == '__main__':
     # verify mysql_init.get_temp_for_graph()
     data = mysql_init.get_temp_for_graph(12)
     print(" ".join(["function: get_temp_for_graph -->", str(len(data)), "records received for 12 hours"]))
+    
+    # verify mysql_init.get_temp_to_complete_graph()
+    data = mysql_init.get_temp_to_complete_graph(1)
+    print(" ".join(["function: get_temp_to_complete_graph --> there is", str(len(data)), "new records"]))
     
     
     
