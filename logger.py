@@ -146,26 +146,26 @@ class DataLogger:
                     print(msg)
                     mesure_ok = False
 
-                # traite les erreurs les plus fréquentes soit temp = 85°C
-                pass_count = 1
-                if temperature >= 85:
-                    while pass_count > 0:
-                        temperature, sensor_id, mesure_status = self.ds18b20_array.tempC(i)
-                        txt = "".join([time.strftime('%Y.%m.%d %H:%M:%S'), " Capteur : ", str(sensor_num), " --> temperature = 85°C --> essai no : ", str(pass_count)])
-                        print(txt)
-                        if temperature >= 85:
-                            pass_count -= 1
-                            if pass_count == 0:
-                                txt = "".join([time.strftime('%Y.%m.%d %H:%M:%S'), " Capteur : ", str(sensor_num), " --> temperature = 85°C --> essai no : ", str(pass_count)])
-                                print(txt)
-                                mesure_status = "Erreur de mesure"
-                                mesure_ok = False
+            # traite les erreurs les plus fréquentes soit temp = 85°C
+            pass_count = 1
+            if temperature >= 85:
+                while pass_count > 0:
+                    temperature, sensor_id, mesure_status = self.ds18b20_array.tempC(i)
+                    txt = "".join([time.strftime('%Y.%m.%d %H:%M:%S'), " Capteur : ", str(sensor_num), " --> temperature = 85°C --> essai no : ", str(pass_count)])
+                    print(txt)
+                    if temperature >= 85:
+                        pass_count -= 1
+                        if pass_count == 0:
+                            txt = "".join([time.strftime('%Y.%m.%d %H:%M:%S'), " Capteur : ", str(sensor_num), " --> temperature = 85°C --> essai no : ", str(pass_count)])
+                            print(txt)
+                            mesure_status = "Erreur de mesure"
+                            mesure_ok = False
 
-                                sys.stdout.write("\033[1;31m") # blue = "\033[1;34m" -> red = "\033[1;31m" --> green = "\033[0;32m"
-                                print(str(sensor_num) + ' - ' + str(sensor_id) + ' -> ' + sensor_txt + ' = ' + str(temperature) + ' --> ' + mesure_status)
-                                sys.stdout.write("\033[0m") # end color
-                        else:
-                            pass_count = 0
+                            sys.stdout.write("\033[1;31m") # blue = "\033[1;34m" -> red = "\033[1;31m" --> green = "\033[0;32m"
+                            print(str(sensor_num) + ' - ' + str(sensor_id) + ' -> ' + sensor_txt + ' = ' + str(temperature) + ' --> ' + mesure_status)
+                            sys.stdout.write("\033[0m") # end color
+                    else:
+                        pass_count = 0
                                           
             if mesure_ok:
                 sensor_num1 = sensor_num 

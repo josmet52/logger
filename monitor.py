@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from math import *
 
 from lib.mysql_lib_logger import Mysql
-# import pdb
+import pdb
 
 class Main:
     
@@ -48,13 +48,13 @@ class Main:
 
 
         # reduire de pc_red la taille utilisée par l'application
-        pc_reduction_factor = .75
-        self.win_width =  int(self.win_width_th*pc_reduction_factor)
-        self.win_height = int(self.win_height_th*pc_reduction_factor)
+        win_reduction_factor = 0.9
+        self.win_width =  int(self.win_width_th * win_reduction_factor)
+        self.win_height = int(self.win_height_th * win_reduction_factor)
 
         self.win_pos_x = (self.win_width_th - self.win_width) / 2
-        self.win_pos_y = (self.win_height_th - self.win_height) / 4
-        
+        self.win_pos_y = (self.win_height_th - self.win_height) / 20
+#         pdb.set_trace()
         print("win size :" , self.win_width, "x", self.win_height)
         
         # main windows
@@ -194,12 +194,12 @@ class Main:
         # variables de dimensions
         self.graduation_step = 2
         self.V_PADX = 100 * self.win_width / self.max_width
-        self.V_PADY = 100 * self.win_width / self.max_width
+        self.V_PADY = 75 * self.win_width / self.max_width
         # initialisations pour le graph
         self.X_MIN = self.V_PADX
         self.X_MAX = self.win_width - self.V_PADX
         self.Y_MAX = self.V_PADY
-        self.Y_MIN = self.win_height * 3/4 - self.V_PADY
+        self.Y_MIN = self.win_height * 0.8 - self.V_PADY
         
         # variables pour les échelles x et y
         self.echelle_x_min = 0
@@ -386,7 +386,7 @@ class Main:
         tk.Label(self.tk_root, text = "--- Boiler f-t", pady = v_pady, fg = self.COLOR_BOILER_FT, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
  
         # initialize le canvas pour le graphique des températures
-        self.cnv = tk.Canvas(bg = "azure", height = 0.75 * self.win_height, width = self.win_width)
+        self.cnv = tk.Canvas(bg = "azure", height = 0.8 * self.win_height, width = self.win_width)
 
         # create the menus
         menubar = Menu(self.tk_root)
