@@ -14,6 +14,7 @@ from tkinter import *
 from datetime import datetime, timedelta
 
 from lib.mysql_lib_logger import Mysql
+import pdb
 
 class Main:
     
@@ -31,7 +32,7 @@ class Main:
         
         # variables de controle
         self._job = None
-        self.t_pause = 2500 # 60 secondes 
+        self.t_pause = 5000 # 60 secondes 
         self.n_passe = 0
         # initialize self.t_elapsed to 0 seconds
         self.t_elapsed = datetime.now() - datetime.now() 
@@ -41,17 +42,25 @@ class Main:
         self.max_height = 1080
         screen_width = tk_root.winfo_screenwidth()  
         screen_height = tk_root.winfo_screenheight()  
-        self.win_width = min(self.max_width, screen_width)
-        self.win_height = min(self.max_height, screen_height)
+        self.win_width_th = min(self.max_width, screen_width)
+        self.win_height_th = min(self.max_height, screen_height)
+
+
         # reduire de pc_red la taille utilisée par l'application
-        pc_red = 10
-        self.win_width -=  int(self.win_width/pc_red)
-        self.win_height -= int(self.win_height/pc_red)
+        pc_reduction_factor = .75
+        self.win_width =  int(self.win_width_th*pc_reduction_factor)
+        self.win_height = int(self.win_height_th*pc_reduction_factor)
+
+        self.win_pos_x = (self.win_width_th - self.win_width) / 2
+        self.win_pos_y = (self.win_height_th - self.win_height) / 4
         
         print("win size :" , self.win_width, "x", self.win_height)
         
         # main windows
         self.tk_root = tk_root
+        self.tk_root.geometry("%dx%d+%d+%d" % (self.win_width, self.win_height, self.win_pos_x, self.win_pos_y))
+        
+        
         self.ip_db_server = "192.168.1.139"
         self.mysql_logger = Mysql(self.ip_db_server)
         self.local_ip = self.mysql_logger.local_ip
@@ -496,7 +505,7 @@ class Main:
         self.data_from_db = list(self.data_from_db)
         
         # initialize the last id in the graph_data
-        self.last_id = self.data_from_db[len(self.data_from_db) - 1][1]
+#         self.last_id = self.data_from_db[len(self.data_from_db) - 1][19]
         self.refresh_display()
         
 
@@ -570,7 +579,10 @@ class Main:
             # ajouter à data_for_graph
             data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
                                    row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19]])
-
+        self.last_id = data_for_graph[len(data_for_graph)-1][19]
+        
+#         pdb.set_trace()
+            
 #         print(data_for_graph)
         
 
@@ -921,7 +933,9 @@ class Main:
 
             p_str = "".join(["passe:", str(self.n_passe)])
             p_str += "".join([" n_row:", str(n_row), " removed:"])
-            
+
+#             pdb.set_trace()
+
             # remove the old(s) record(s) in the data_from_db list
             while n_removed < n_row:
                 record_to_remove = self.data_from_db[0]

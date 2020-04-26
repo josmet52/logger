@@ -164,7 +164,7 @@ class Mysql:
 #         sql_txt = "".join(["SELECT timeStamp, id, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14 FROM tLog WHERE id > '", str(last_id), "';"])
         sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, time_stamp, id ",
                            "FROM tlog WHERE id > '", str(last_id), "';"])
-        print(sql_txt)
+#         print(sql_txt)
         
 
         cur.execute(sql_txt)
