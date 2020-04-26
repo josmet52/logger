@@ -1,5 +1,5 @@
 exporter:
-mysqldump -u root -pmablonde logger > /media/pi/TEMP_DB/20200425_logger.sql
+mysqldump -upi -pmablonde logger > /media/pi/TEMP_DB/20200426_logger.sql
 
 importer:
-sudo mysql -u pi -pmablonde logger < /media/pi/TEMP_DB/20200425_logger.sql
+sudo mysql -upi -pmablonde logger < /media/pi/TEMP_DB/20200426_logger.sql

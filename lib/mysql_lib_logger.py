@@ -8,7 +8,7 @@ import sys
 from tkinter import messagebox
 import mysql.connector
 
-# import tkinter as tk
+import tkinter as tk
 from datetime import datetime, timedelta
 # import time
 
@@ -68,11 +68,11 @@ class Mysql:
         
         con, e = self.get_db_connexion()
         if not con:
-            print("_init_ -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + "\nLe programme va s'arrêter")
+            print("mysql_lib_logger : _init_ -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + "\nLe programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
-            tk.messagebox.showerror("DB UNEXPECTED ERROR", msg)
+            tk.messagebox.showerror("mysql_lib_logger ERROR", msg)
             print("DB UNEXPECTED ERROR", msg)
-            exit()
+            sys.exit()
             
     def get_db_connexion(self):
         
@@ -92,6 +92,23 @@ class Mysql:
         except:
             # return error
             return False, sys.exc_info()
+        
+    def get_first_mesured_temperature(self):
+      
+        con, e = self.get_db_connexion()
+        if not con:
+            print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
+            msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
+            tk.messagebox.showerror(msg)
+            logging.warning("DB UNEXPECTED ERROR", msg)
+            exit()
+        
+        cur = con.cursor()
+        sql_txt =  "SELECT time_stamp, t12, t13, t14 FROM tlog WHERE id=(SELECT MIN(id) FROM tlog);"
+        cur.execute(sql_txt)
+        row = cur.fetchall()
+        # return only the first record
+        return row[0]
         
     def get_last_mesured_temperature(self):
       
@@ -120,6 +137,10 @@ class Mysql:
 
         time_end_mesure = datetime.strptime(time_last_mesure_str, '%Y-%m-%d %H:%M:%S')
         time_begin_mesure = time_end_mesure - timedelta(hours=nbre_hours_on_graph)
+        
+        first_record_in_db = self.get_first_mesured_temperature()[0]
+        if first_record_in_db > time_begin_mesure:
+            time_begin_mesure = first_record_in_db
         
         # connect the db and create the cursor to access the database
       
