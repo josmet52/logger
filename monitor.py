@@ -25,9 +25,10 @@ class Main:
     def __init__(self, tk_root):
 
         # version infos
-        self.VERSION_NO = "0.01.01" 
-        self.VERSION_DATE = "25.04.2020"
-        self.VERSION_DESCRIPTION = "start of the new version 'logger'"
+        self.VERSION_NAME = "Monitor" 
+        self.VERSION_NO = "0.01.03" 
+        self.VERSION_DATE = "27.04.2020"
+        self.VERSION_DESCRIPTION = "start of the new version 'monitor' without states"
         self.VERSION_STATUS = "in development"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
@@ -60,6 +61,7 @@ class Main:
         # main windows
         self.tk_root = tk_root
         self.tk_root.geometry("%dx%d+%d+%d" % (self.win_width, self.win_height, self.win_pos_x, self.win_pos_y))
+        self.tk_root.configure(background='grey95')
         
         
         self.ip_db_server = "192.168.1.139"
@@ -111,10 +113,15 @@ class Main:
         self.display_trace_in_boiler = IntVar(self.tk_root)
         self.display_trace_boiler_ft = IntVar(self.tk_root)
         
-        # ON/OFF pac et boiler
-        self.display_trace_pac_on_off = IntVar(self.tk_root)
-        self.display_trace_boiler_on_off = IntVar(self.tk_root)
-        
+        # states pac et boiler
+#         self.display_trace_pac_on_off = IntVar(self.tk_root)
+#         self.display_trace_boiler_on_off = IntVar(self.tk_root)
+
+        self.display_trace_pump_boiler = IntVar(self.tk_root)
+        self.display_trace_pump_home = IntVar(self.tk_root)
+        self.display_trace_boiler_on = IntVar(self.tk_root)
+        self.display_trace_pac_on = IntVar(self.tk_root)
+
         # affichages des valeurs sur le curseur de la souris
         self.display_valeur_x = IntVar(self.tk_root)
         self.display_valeur_y = IntVar(self.tk_root)
@@ -150,9 +157,11 @@ class Main:
         self.display_trace_in_boiler.set(False)
         self.display_trace_boiler_ft.set(False)
         
-        # ON/OFF PAC et boiler
-        self.display_trace_pac_on_off.set(False)
-        self.display_trace_boiler_on_off.set(False)
+        # states PAC et boiler
+        self.display_trace_pump_boiler.set(True)
+        self.display_trace_pump_home.set(True)
+        self.display_trace_boiler_on.set(True)
+        self.display_trace_pac_on.set(True)
         
         # valeurs sur curseur souris
         self.display_valeur_x.set(False)
@@ -207,12 +216,8 @@ class Main:
         self.echelle_y_min = 0
         self.echelle_y_max = 0
 
-        # variables pour le grid de tkinter
-        self.n_col = 32
-        self.col_width = int(self.win_width / self.n_col)
-
         # pad x et y pour les afficheurs
-        self.padx = 0
+        self.padx = 20
         self.pady = 0
 
         # Polices 
@@ -223,37 +228,60 @@ class Main:
         self.FONT_TEMP = "".join(["Helvetica ",str(int(70*self.win_width/self.max_width))])
 
         # couleurs
-        self.FG_COLOR_TEXT = "black"
-        self.FG_COLOR_WAIT = "gray10"
+        color_list = [(199, 77, 127),(106, 150, 193),(32, 110, 224),(199, 84, 29),(190, 118, 112),(207, 15, 110),
+                      (19, 36, 161),(199, 155, 117),(210, 165, 0),(38, 103, 191),(162, 41, 10),(124, 165, 155),
+                      (0, 136, 124),(242, 18, 44),(239, 2, 193),(251, 143, 136),(196, 42, 237),(174, 175, 150),
+                      (63, 54, 80),(191, 170, 138),(168, 186, 213),(255, 0, 0),(172, 159, 120),(242, 44, 141),
+                      (158, 29, 64),(157, 196, 40),(162, 202, 79),(241, 193, 254),(75, 107, 176),(44, 122, 217)]
+
+        # afficheurs
+        self.COLOR_SALON = self.color_from_rgb(color_list[0])
+        self.COLOR_BUREAU = self.color_from_rgb(color_list[1])
+        self.COLOR_EXT = self.color_from_rgb(color_list[2])
+        self.COLOR_PAC_VAL = self.color_from_rgb(color_list[3])
+        # pac
+        self.COLOR_FROM_PAC = self.color_from_rgb(color_list[4])
+        self.COLOR_TO_PAC = self.color_from_rgb(color_list[5])
+        self.COLOR_FROM_ACCU = self.color_from_rgb(color_list[6])
+        self.COLOR_ON_BYPASS = self.color_from_rgb(color_list[7])
+        self.COLOR_FT_PAC = self.color_from_rgb(color_list[8])
+        # home
+        self.COLOR_TO_HOME = self.color_from_rgb(color_list[9])
+        self.COLOR_FROM_REZ = self.color_from_rgb(color_list[10])
+        self.COLOR_FROM_1ER = self.color_from_rgb(color_list[11])
+        self.COLOR_FROM_HOME = self.color_from_rgb(color_list[12])
+        self.COLOR_FROM_BYPASS = self.color_from_rgb(color_list[13])
+        self.COLOR_FT_HOME = self.color_from_rgb(color_list[14])
+        # boiler
+        self.COLOR_TO_BOILER = self.color_from_rgb(color_list[15])
+        self.COLOR_IN_BOILER = self.color_from_rgb(color_list[16])
+        self.COLOR_FROM_BOILER = self.color_from_rgb(color_list[17])
+        self.COLOR_FT_BOILER = self.color_from_rgb(color_list[18])
+        # states
+        self.COLOR_PUMP_BOILER = self.color_from_rgb(color_list[19])
+        self.COLOR_PUMP_HOME = self.color_from_rgb(color_list[20])
+        self.COLOR_PAC_ON_OFF = self.color_from_rgb(color_list[21])
+        self.COLOR_BOILER_ON_OFF = self.color_from_rgb(color_list[22])
         
-        self.COLOR_SALON = "blue"
-        self.COLOR_BUREAU = "DarkOrange3"
-        self.COLOR_EXT = "green"
-        self.COLOR_PAC_VAL = "gray33"
-        self.COLOR_PAC = "darkred"
-        self.COLOR_PAC_FROM_TO = "purple"
-        self.COLOR_PAC_FROM = "fuchsia"
-        self.COLOR_ACCU_FROM = "dark orchid"
-        self.COLOR_BYPASS_FROM = "light slate blue"
-        self.COLOR_BYPASS_TO = "dark slate blue"
-        self.COLOR_PAC_TO = "deeppink"
-        self.COLOR_BOILER = "chocolate" # "olivedrab"
-        self.COLOR_FROM_BOILER = "sandybrown" # "olivedrab"
-        self.COLOR_BOILER_FT = "saddlebrown" #"yellowgreen"
-        self.COLOR_HOME = "cadetblue"
-        self.COLOR_FROM_HOME = "deepskyblue"
-        self.COLOR_HOME_FT = "steelblue"
         self.GRID_COLOR = "silver"
         self.RECTANGLE_COLOR = "purple"
         
-        self.BG_COLOR = "gray80"
-        self.BG_COLOR_DAYS = "snow2"
+        self.FG_COLOR_TEXT = "black"
+        self.FG_COLOR_WAIT = "gray10"
+        
+        self.BG_COLOR = "grey90"#"gray80"
+        self.BG_COLOR_DAYS = "grey95"
         self.BG_COLOR_PAC = "lavender"
         self.BG_COLOR_SELECTED = "red"
         self.BG_COLOR_UNUSED = "gray75"
+        self.BG_COLOR_LABEL = "grey95"
         
         self.CURSOR_X_COLOR = "red" # "gray25"
         self.CURSOR_Y_COLOR = "blue" # "gray50"
+
+        # variables pour le grid de tkinter
+        self.n_col = 64
+        self.col_width = int(self.win_width / self.n_col)
 
         # 1ere ligne de la GRID : les etiquettes des afficheurs de température 
         # salon
@@ -263,6 +291,7 @@ class Main:
         tk.Label(self.tk_root,
                  text="Salon",
                  fg = self.FG_COLOR_TEXT,
+                 bg = self.BG_COLOR_LABEL,
                  font = self.FONT_TEXT,
                  padx = self.padx,
                  pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
@@ -271,6 +300,7 @@ class Main:
         tk.Label(self.tk_root,
                  text="Bureau",
                  fg = self.FG_COLOR_TEXT,
+                 bg = self.BG_COLOR_LABEL,
                  font = self.FONT_TEXT,
                  padx = self.padx,
                  pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
@@ -279,6 +309,7 @@ class Main:
         tk.Label(self.tk_root,
                  text="Extérieur",
                  fg = self.FG_COLOR_TEXT,
+                 bg = self.BG_COLOR_LABEL,
                  font = self.FONT_TEXT,
                  padx = self.padx,
                  pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
@@ -287,6 +318,7 @@ class Main:
         tk.Label(self.tk_root,
                  text="PAC on-off",
                  fg = self.FG_COLOR_TEXT,
+                 bg = self.BG_COLOR_LABEL,
                  font = self.FONT_TEXT,
                  padx = self.padx,
                  pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
@@ -337,53 +369,78 @@ class Main:
         
         # initialisations pour la 3ème ligne de la GRID : les étiquettes des courbes
         v_row = 2
-        v_column_span = 4
-        v_column = 2
+        v_column_span = 3
+        v_column = 3
         v_pady = 20
         
         # Afficheurs
-        tk.Label(self.tk_root, text = "   --- Salon", pady = v_pady, fg = self.COLOR_SALON, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "   --- Salon", pady = v_pady, fg = self.COLOR_SALON, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Bureau", pady = v_pady, fg = self.COLOR_BUREAU, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Bureau", pady = v_pady, fg = self.COLOR_BUREAU, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Extérieur", pady = v_pady, fg = self.COLOR_EXT, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Extérieur", pady = v_pady, fg = self.COLOR_EXT, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         
-        tk.Label(self.tk_root, text = " | ", pady = v_pady, fg = 'black', font = self.FONT_LABEL).grid(row=v_row, column=v_column)
+        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
         v_column += 1
         
         # PAC
-        tk.Label(self.tk_root, text = "--- Fr. PAC", pady = v_pady, fg = self.COLOR_PAC_FROM, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. PAC", pady = v_pady, fg = self.COLOR_FROM_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. accu", pady = v_pady, fg = self.COLOR_ACCU_FROM, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- To PAC", pady = v_pady, fg = self.COLOR_TO_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- To PAC", pady = v_pady, fg = self.COLOR_PAC_TO, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. accu", pady = v_pady, fg = self.COLOR_FROM_ACCU, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- PAC f-t", pady = v_pady, fg = self.COLOR_PAC_FROM_TO, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- On bypass", pady = v_pady, fg = self.COLOR_ON_BYPASS, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        v_column += v_column_span
+        tk.Label(self.tk_root, text = "--- PAC f-t", pady = v_pady, fg = self.COLOR_FT_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         
-        tk.Label(self.tk_root, text = " | ", pady = v_pady, fg = 'black', font = self.FONT_LABEL).grid(row=v_row, column=v_column)
+        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
         v_column += 1
         
         # Home
-        tk.Label(self.tk_root, text = "--- Fr. home", pady = v_pady, fg = self.COLOR_FROM_HOME, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- To home", pady = v_pady, fg = self.COLOR_TO_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. bypass", pady = v_pady, fg = self.COLOR_BYPASS_FROM, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. rez", pady = v_pady, fg = self.COLOR_FROM_REZ, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- To home", pady = v_pady, fg = self.COLOR_HOME, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. 1er", pady = v_pady, fg = self.COLOR_FROM_1ER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Home f-t", pady = v_pady, fg = self.COLOR_HOME_FT, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. home", pady = v_pady, fg = self.COLOR_FROM_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        v_column += v_column_span
+        tk.Label(self.tk_root, text = "--- Fr. bypass", pady = v_pady, fg = self.COLOR_FROM_BYPASS, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        v_column += v_column_span
+        tk.Label(self.tk_root, text = "--- Home f-t", pady = v_pady, fg = self.COLOR_FT_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         
-        tk.Label(self.tk_root, text = " | ", pady = v_pady, fg = 'black', font = self.FONT_LABEL).grid(row=v_row, column=v_column)
+        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
         v_column += 1
         
         # Boiler
-        tk.Label(self.tk_root, text = "--- Fr. boiler", pady = v_pady, fg = self.COLOR_FROM_BOILER, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- To boiler", pady = v_pady, fg = self.COLOR_TO_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- To boiler", pady = v_pady, fg = self.COLOR_BOILER, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- In. boiler", pady = v_pady, fg = self.COLOR_IN_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Boiler f-t", pady = v_pady, fg = self.COLOR_BOILER_FT, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text = "--- Fr. boiler", pady = v_pady, fg = self.COLOR_FROM_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        v_column += v_column_span
+        tk.Label(self.tk_root, text = "--- Boiler f-t", pady = v_pady, fg = self.COLOR_FT_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        v_column += v_column_span
+        
+#         v_row = 4
+#         v_column_span = 3
+#         v_column = 0
+#         
+#         # Pumps and states
+#         tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
+#         v_column += 1
+#         
+#         tk.Label(self.tk_root, text = "--- Pump boiler", pady = v_pady, fg = self.COLOR_PUMP_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+#         v_column += v_column_span
+#         tk.Label(self.tk_root, text = "--- Pump pac", pady = v_pady, fg = self.COLOR_PUMP_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+#         v_column += v_column_span
+#         tk.Label(self.tk_root, text = "--- Pac onoff", pady = v_pady, fg = self.COLOR_PAC_ON_OFF, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
+#         v_column += v_column_span
+#         tk.Label(self.tk_root, text = "--- Boiler on-off", pady = v_pady, fg = self.COLOR_BOILER_ON_OFF, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
  
         # initialize le canvas pour le graphique des températures
         self.cnv = tk.Canvas(bg = "azure", height = 0.8 * self.win_height, width = self.win_width)
@@ -409,17 +466,20 @@ class Main:
         
         # menu courbes de température
         curvesmenu = Menu(menubar, tearoff=0)
+        # afficheurs
         curvesmenu.add_checkbutton(label="Salon", font = self.FONT_LABEL, variable = self.display_trace_salon, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="Bureau", font = self.FONT_LABEL, variable = self.display_trace_bureau, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="Extérieur", font = self.FONT_LABEL, variable = self.display_trace_ext, command = self.change_curves_on_display)
         curvesmenu.add_command(label="Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
         curvesmenu.add_separator()
+        # PAC
         curvesmenu.add_checkbutton(label="From PAC", font = self.FONT_LABEL, variable = self.display_trace_from_pac, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="To PAC", font = self.FONT_LABEL, variable = self.display_trace_to_pac, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="From accu", font = self.FONT_LABEL, variable = self.display_trace_from_accu, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="PAC from-to", font = self.FONT_LABEL, variable = self.display_trace_pac_ft, command = self.change_curves_on_display)
         curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
         curvesmenu.add_separator()
+        # home
         curvesmenu.add_checkbutton(label="On bypass", font = self.FONT_LABEL, variable = self.display_trace_on_bypass, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="To home", font = self.FONT_LABEL, variable = self.display_trace_to_home, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="From home rez", font = self.FONT_LABEL, variable = self.display_trace_from_home_rez, command = self.change_curves_on_display)
@@ -429,16 +489,23 @@ class Main:
         curvesmenu.add_checkbutton(label="Home from-to", font = self.FONT_LABEL, variable = self.display_trace_home_ft, command = self.change_curves_on_display)
         curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
         curvesmenu.add_separator()
+        # boiler
         curvesmenu.add_checkbutton(label="To boiler", font = self.FONT_LABEL, variable = self.display_trace_to_boiler, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="In boiler", font = self.FONT_LABEL, variable = self.display_trace_in_boiler, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="From boiler", font = self.FONT_LABEL, variable = self.display_trace_from_boiler, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="Boiler from-to", font = self.FONT_LABEL, variable = self.display_trace_boiler_ft, command = self.change_curves_on_display)
         curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
         curvesmenu.add_separator()
+        # states
+        curvesmenu.add_checkbutton(label="Pump boiler", font = self.FONT_LABEL, variable = self.display_trace_pump_boiler, command = self.change_curves_on_display)
+        curvesmenu.add_checkbutton(label="Pump home", font = self.FONT_LABEL, variable = self.display_trace_pump_home, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
+        curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
+        curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
+
 #         curvesmenu.add_checkbutton(label="PAC on/off", font = self.FONT_LABEL, variable = self.display_trace_pac_on_off, command = self.change_curves_on_display)
 #         curvesmenu.add_checkbutton(label="Boiler on/off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on_off, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="On/off toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("on/off"))
-#         curvesmenu.add_separator()
+        curvesmenu.add_separator()
         curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
         curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
         menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
@@ -568,60 +635,17 @@ class Main:
         # index du dernier enregistrement
         self.last_id = data_for_graph[len(data_for_graph)-1][19]
         
-#         old_t_to_boiler = 0 # row[9]
-#         old_t_to_home = 0 # row[6]
-        
-#         # s'il n'y a pas de zoom actif, initialiser les index pour first et last data record
-#         if not self.zoom_active:
-#             self.index_first_displayed_record = 0
-#             self.index_last_displayed_record = len(self.data_from_db)-1
-#         
-#         # parcourir tous les data's
-#         for i, row in enumerate(self.data_from_db):
-#             # vérifier si l'index du record est dans la plage des records à afficher
-#             
-#             if i >= self.index_first_displayed_record and i <= self.index_last_displayed_record:
-#                 
-#                 # algorithmes pour PAC ON-OFF et boiler on-off
-#                 pac_on_off = 0
-#                 boil_on_off = 0
-# 
-#                 # boiler on/off:  en fonction de la pente de la courbe de la temperature 'to_boiler'
-#                 if i > 0:
-#                     delta_t_to_boiler = row[9] - old_t_to_boiler
-#                     if delta_t_to_boiler > 0.25 and abs(delta_t_to_boiler) < 2:
-#                         # la valeur correspond à une graduation sur l'affichage
-#                         boil_on_off = self.graduation_step
-#                 
-#                 # PAC on/off : en fonction de la différence de température entre 'pac_from' et 'pac_to'
-#                     pac_ft_t = row[2] - row[3] 
-#                     delta_t_to_home = row[4] - old_t_to_home
-#                     if pac_ft_t > 4 and (boil_on_off == 0): # from pac - to pac > 3 => pac = on
-#                         pac_on_off = self.graduation_step
-# 
-#                     # ajouter à data_for_graph
-#                     data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
-#                                            row[11], row[12], row[13], row[14], row[15], pac_on_off, boil_on_off, delta_t_to_home * 10, delta_t_to_boiler * 5])
-#                     # memorise valeur actuelles pour calcul d/dt    
-#                     old_t_to_boiler = row[9]
-#                     old_t_to_home = row[4]
-#                     
-#                 else:
-#                     # memorise premières valeur pour calcul d/dt    
-#                     old_t_to_boiler = row[9]
-#                     old_t_to_home = row[4]
-#             
-#         # Calcul % PAC ON
-#         count_on = 0
-#         count_tot = 0
-#         for p in data_for_graph:
-#             count_tot += 1
-#             if p[16] > 0:
-#                 count_on += 1
-#         if count_tot > 0:
-#             self.pac_on_off = count_on / count_tot * 100
-#         else:
-#             self.pac_on_off = 0
+        # Calcul % PAC ON
+        count_on = 0
+        count_tot = 0
+        for p in data_for_graph:
+            count_tot += 1
+            if p[17] > 0:
+                count_on += 1
+        if count_tot > 0:
+            self.pac_on_off = count_on / count_tot * 100
+        else:
+            self.pac_on_off = 0
             
 
         # Affichage des températures actuelles
@@ -642,9 +666,7 @@ class Main:
 
         # echelles min et max pour les ordonnées
         if not self.zoom_active:
-            self.echelle_y_min , self.echelle_y_max = self.get_minmax_echelle_y(data_for_graph)
-        # clculer les graduation pour les labels sur l'axe des y (températures)
-        self.graduation_step = self.get_y_graduation_step(self.echelle_y_min , self.echelle_y_max)
+            self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(data_for_graph)
 
         # initialize date and time
         datetime_start_plot = data_for_graph[0][18]
@@ -679,13 +701,21 @@ class Main:
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
         
         # PAC label only if PAC or boiler is displayed
-        if self.display_trace_pac_on_off.get() or self.display_trace_boiler_on_off.get():
+        if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
+#         if self.display_trace_pac_on_off.get() or self.display_trace_boiler_on_off.get():
             y_pos = self.echelle_y_min + self.graduation_step / 3
-            y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) + self.Y_MIN
-            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC, text = "PAC\nBoiler")
+            y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *0.25  + self.Y_MIN 
+            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
+            y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *1 + self.Y_MIN 
+            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_BOILER, text = "Boiler")
+            y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *1.75  + self.Y_MIN 
+            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_HOME, text = "Home")
+            min_y_label = self.graduation_step
+        else:
+            min_y_label = 0
         
         # temperature labels on the y axe
-        y_pos = self.echelle_y_min 
+        y_pos = self.echelle_y_min + min_y_label
         while y_pos <= self.echelle_y_max:
             y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) + self.Y_MIN
             self.cnv.create_text(self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, text = '{0:.2f}'.format(y_pos))
@@ -697,7 +727,7 @@ class Main:
         
         # labels and grid for x axis
         # allways 12 mark on this axis
-        tic_space = self.nbre_hours_on_graph / 12
+        tic_space = self.nbre_hours_on_graph / 18
         # get the correlation between pixels and hours 
         x_val_to_pix = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph
         
@@ -763,25 +793,25 @@ class Main:
                 if self.display_trace_from_pac.get() and mes[0] != -333:
                     t_from_pac = mes[0]
                     y = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_from_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PAC_FROM)
+                    self.cnv.create_line(old_x, old_y_from_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_PAC)
                     old_y_from_pac = y
                     
                 if self.display_trace_to_pac.get() and mes[1] != -333:
                     t_to_pac = mes[1]
                     y = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_to_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PAC_TO)
+                    self.cnv.create_line(old_x, old_y_to_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_PAC)
                     old_y_to_pac = y
          
                 if self.display_trace_from_accu.get() and mes[2] != -333:
                     t_from_accu = mes[2]
                     y = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_from_accu, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ACCU_FROM)
+                    self.cnv.create_line(old_x, old_y_from_accu, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_ACCU)
                     old_y_from_accu = y
                     
                 if self.display_trace_pac_ft.get() and mes[0] != -333 and mes[1] != -333:
                     t_pac_ft = mes[0] - mes[1]
                     y = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_pac_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PAC_FROM_TO)
+                    self.cnv.create_line(old_x, old_y_pac_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
                     old_y_pac_ft = y
                     
                 # Home
@@ -789,25 +819,25 @@ class Main:
                 if self.display_trace_on_bypass.get() and mes[3] != -333:
                     t_on_bypass = mes[3]
                     y = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_on_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PAC_TO)
+                    self.cnv.create_line(old_x, old_y_on_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
                     old_y_on_bypass = y
                     
                 if self.display_trace_to_home.get() and mes[4] != -333:
                     t_to_home = mes[4]
                     y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_to_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_HOME)
+                    self.cnv.create_line(old_x, old_y_to_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_HOME)
                     old_y_to_home = y
                     
                 if self.display_trace_from_home_rez.get() and mes[5] != -333:
                     t_from_home_rez = mes[5]
                     y = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_from_home_rez, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_HOME)
+                    self.cnv.create_line(old_x, old_y_from_home_rez, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_REZ)
                     old_y_from_home_rez = y
                     
                 if self.display_trace_from_home_1er.get() and mes[6] != -333:
                     t_from_home_1er = mes[6]
                     y = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_from_home_1er, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_HOME)
+                    self.cnv.create_line(old_x, old_y_from_home_1er, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_1ER)
                     old_y_from_home_1er = y
                     
                 if self.display_trace_from_home.get() and mes[7] != -333:
@@ -819,26 +849,26 @@ class Main:
                 if self.display_trace_from_bypass.get() and mes[8] != -333:
                     t_from_bypass = mes[8]
                     y = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_from_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_BYPASS_FROM)
+                    self.cnv.create_line(old_x, old_y_from_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BYPASS)
                     old_y_from_bypass = y
                     
                 if self.display_trace_home_ft.get() and mes[4] != -333 and mes[7] != -333:
                     t_to_home = mes[4] - mes[7]
                     y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_home_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_HOME_FT)
+                    self.cnv.create_line(old_x, old_y_home_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_HOME)
                     old_y_home_ft = y
 
                 # Boiler
                 if self.display_trace_to_boiler.get() and mes[9] != -333:
                     t_to_boiler = mes[9]
                     y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_to_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_BOILER)
+                    self.cnv.create_line(old_x, old_y_to_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_BOILER)
                     old_y_to_boiler = y
                     
                 if self.display_trace_in_boiler.get() and mes[10] != -333:
                     t_in_boiler = mes[10]
                     y = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_in_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_BOILER)
+                    self.cnv.create_line(old_x, old_y_in_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_IN_BOILER)
                     old_y_in_boiler = y
                     
                 if self.display_trace_from_boiler.get() and mes[11] != -333:
@@ -848,30 +878,35 @@ class Main:
                     old_y_from_boiler = y
                     
                 if self.display_trace_boiler_ft.get() and mes[9] != -333 and mes[11] != -333:
-                    t_to_boiler = mes[9] - mes[11]
+                    t_to_boiler = mes[11] - mes[9]
                     y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-                    self.cnv.create_line(old_x, old_y_boiler_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_BOILER_FT)
+                    self.cnv.create_line(old_x, old_y_boiler_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_BOILER)
                     old_y_boiler_ft = y
+                    
+                # pumps
+                if self.display_trace_pump_boiler.get() and mes[15] != -1:
+                    s_pump_boiler = mes[15]
+                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+                    self.cnv.create_line(x, self.Y_MIN, x, y, width=5, fill=self.COLOR_PUMP_BOILER)
+                     
+                if self.display_trace_pump_home.get() and mes[16] != -1:
+                    s_pump_home = mes[16]
+                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+                    self.cnv.create_line(x, self.Y_MIN, x, y, width=5, fill=self.COLOR_PUMP_HOME)
+                     
+#                 if self.display_trace_pac_on.get() and mes[17] != -1:
+#                     s_pac_onoff = mes[17]
+#                     y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
+#                     self.cnv.create_line(old_x, old_y_pac_onoff, x, y , width=self.TRACE_WIDTH, fill=self.COLOR_PAC_ON_OFF)
+#                     old_y_pac_onoff = y
+                     
+                if self.display_trace_pac_on.get() and mes[17] != -1:
+                    s_pac_onoff = mes[17]
+                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
+                    if s_pac_onoff == 1:
+                        self.cnv.create_line(old_x, self.Y_MIN+2.5, x, self.Y_MIN+2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
+#                     old_y_pac_onoff = y
                 
-#                 # graphique PAC ON/OFF
-#                 if self.display_trace_pac_on_off.get():
-#                     pac_on_off = mes[16]
-#                     if pac_on_off != 0:
-#                         y = self.Y_MIN + self.graduation_step * y_val_to_pix
-#                     else:
-#                         y = self.Y_MIN
-# 
-#                     if i > 0:
-#                         self.cnv.create_line(old_x,  old_y_onoff, x, y, width=self.TRACE_WIDTH, fill=self.COLOR_PAC)
-#                 
-#                 # graphique BOILER ON/OFF
-#                 if self.display_trace_boiler_on_off.get():
-#                     boil_on_off = mes[17]
-#                     if boil_on_off != 0:
-#                         y = self.Y_MIN + self.graduation_step * y_val_to_pix
-#                         self.cnv.create_line(x, self.Y_MIN, x, y + self.TRACE_WIDTH, width=2*self.TRACE_WIDTH, fill=self.COLOR_BOILER)
-#                         
-#                 old_y_onoff = y
                 old_x = x
 
             else: # this is the first pass also initialize the old values
@@ -951,58 +986,16 @@ class Main:
                     old_y_from_boiler = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
 
                 if self.display_trace_boiler_ft.get():
-                    t_boiler_ft = mes[9] - mes[11]
+                    t_boiler_ft = mes[11] - mes[9]
                     old_y_boiler_ft = y_val_to_pix * (t_boiler_ft - self.echelle_y_min) + self.Y_MIN
                 
-#                 # graphique PAC ON/OFF
-#                 pac_on_off = mes[16]
-#                 if pac_on_off != 0:
-#                     old_y_from_home = self.Y_MIN + self.graduation_step * y_val_to_pix
-#                 else:
-#                     old_y_from_home = self.Y_MIN
-#                 
-#                 # graphique BOILER ON/OFF
-#                 boil_on_off = mes[17]
-#                 if boil_on_off != 0:
-#                     old_y_from_boiler = self.Y_MIN + self.graduation_step * y_val_to_pix
-#                     
-#                 old_y_onoff = self.Y_MIN
+                # states 
+                if self.display_trace_pac_on.get():
+                    s_pac_onoff = mes[17]
+                    old_y_pac_onoff = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
+                    
                 old_x = old_x
 
-# tbd #2    --> revoir le calcul de la position des curseur en fonction de l'étendue de l'échelle du temp
-#           --> pour le moment les curseurs ne sont pas recréés
-#           --> voir tbd #2 dans on_mouse_manage()
-#
-        # calculate pixels par minute on the x axis 
-#         xaxis_secondes = timedelta.total_seconds(date_end - date_start)
-#         xaxis_minutes = xaxis_secondes / 60
-#         xaxis_pixels = self.X_MAX - self.X_MIN
-#         pixels_par_minute = xaxis_pixels / xaxis_minutes
-        
-        # recréer les curseurs x
-#         for i_mouse_pos_cursor, x_pos_cursor in enumerate(self.mouse_pos_cursors_x):
-#             
-#             if self.n_passe > 2 and (self.old_date_start != date_start):
-#                 x_new = x_pos_cursor - pixels_par_minute
-#             else:
-#                 x_new = x_pos_cursor
-#                 
-#             self.mouse_cursors_x.append(self.cnv.create_line(x_new, self.Y_MIN, x_new, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
-#             self.mouse_pos_cursors_x[i_mouse_pos_cursor] = x_new
-#         
-#         # recréer les curseurs y
-#         for i_mouse_pos_cursor, y_pos_cursor in enumerate(self.mouse_pos_cursors_y):
-#             
-#             if self.n_passe > 2 and (self.old_date_start != date_start):
-#                 y_new = y_pos_cursor - pixels_par_minute
-#             else:
-#                 y_new = y_pos_cursor
-#                 
-#             self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, y_new, self.X_MAX, y_new, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
-#             self.mouse_pos_cursors_y[i_mouse_pos_cursor] = y_new
-#             
-#         self.old_date_start = date_start
-# tbd #2 end
             
         self.t_elapsed = datetime.now() - t_start
         secondes_decimales_str = str(self.t_elapsed).split(".")[1]
@@ -1131,11 +1124,11 @@ class Main:
                 max_found = False
                 for i, row in enumerate(self.data_from_db):
                     
-                    if row[0] >= time_begin_mesure and not min_found:
+                    if row[18] >= time_begin_mesure and not min_found:
                         self.index_first_displayed_record = i
                         min_found = True
                         
-                    if row[0] >= time_end_mesure and not max_found:
+                    if row[18] >= time_end_mesure and not max_found:
                         self.index_last_displayed_record  = i
                         max_found = True
                 # set the zoom indicator
@@ -1215,7 +1208,8 @@ class Main:
         self.cnv.update()
         
         # mettre à jour l'affichage
-        self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
+#         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
+        self.refresh_display()
 
 
     # fonction appelée par le menu 'timemenu'
@@ -1270,9 +1264,14 @@ class Main:
             self.display_trace_from_boiler.set(not self.display_trace_from_boiler.get())
             self.display_trace_boiler_ft.set(not self.display_trace_boiler_ft.get())
 
-#         if who == "on/off":
+        if who == "states":
 #             self.display_trace_pac_on_off.set(not self.display_trace_pac_on_off.get())
 #             self.display_trace_boiler_on_off.set(not self.display_trace_boiler_on_off.get())
+            
+            self.display_trace_pump_boiler.set(not self.display_trace_pump_boiler.get())
+            self.display_trace_pump_home.set(not self.display_trace_pump_home.get()) 
+            self.display_trace_boiler_on.set(not self.display_trace_boiler_on.get()) 
+            self.display_trace_pac_on.set(not self.display_trace_pac_on.get()) 
             
         if who == "zero": 
             self.display_trace_salon.set(False)
@@ -1442,11 +1441,11 @@ class Main:
                 max_found = False
                 for i, row in enumerate(self.data_from_db):
                     
-                    if row[0] >= datetime.strptime(x_min_date, '%Y-%m-%d %H:%M:%S') and not min_found:
+                    if row[18] >= datetime.strptime(x_min_date, '%Y-%m-%d %H:%M:%S') and not min_found:
                         self.index_first_displayed_record = i
                         min_found = True
                         
-                    if row[0] >= datetime.strptime(x_max_date, '%Y-%m-%d %H:%M:%S') and not max_found:
+                    if row[18] >= datetime.strptime(x_max_date, '%Y-%m-%d %H:%M:%S') and not max_found:
                         self.index_last_displayed_record  = i
                         max_found = True
                 y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
@@ -1566,7 +1565,7 @@ class Main:
         division = etendue_echelle / nbre_div
         
         if division >= 1:
-            n = floor(division)
+            n = ceil(division)
         else:
             if division > 0.25 :
                 n = 0.5
@@ -1662,24 +1661,36 @@ class Main:
                 y_max = max(y_max, t[11])
                 
             if self.display_trace_boiler_ft.get() and t[9] != -333 and t[11] != -333:
-                t_delta_boiler = t[9] - t[11]
+                t_delta_boiler = t[11] - t[9]
                 y_min = min(y_min, t_delta_boiler)
                 y_max = max(y_max, t_delta_boiler)
-                
+        
+#         pdb.set_trace()
+        
         if y_max < y_min:
             y_max = 20
             y_min = 0
                 
-        if self.display_trace_pac_on_off.get() or self.display_trace_boiler_on_off.get():
-            y_min_ret = (y_min // self.graduation_step) * self.graduation_step  - 2 * self.graduation_step
-            y_max_ret = (y_max // self.graduation_step) * self.graduation_step
+        graduation_step = self.get_y_graduation_step(y_min , y_max)        
+                
+        if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
+#         if self.display_trace_pac_on_off.get() or self.display_trace_boiler_on_off.get():
+            y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
+            y_max_ret = (y_max // graduation_step) * graduation_step
         else:
-            y_min_ret = (y_min // self.graduation_step) * self.graduation_step  
-            y_max_ret = (y_max // self.graduation_step) * self.graduation_step
+            y_min_ret = (y_min // graduation_step) * graduation_step  
+            y_max_ret = (y_max // graduation_step) * graduation_step
             
         if y_max > 0:
-            y_max_ret += self.graduation_step
-        return y_min_ret, y_max_ret
+            y_max_ret += graduation_step
+            
+        return y_min_ret, y_max_ret, graduation_step
+
+
+    def color_from_rgb(self, rgb):
+        """translates an rgb tuple of int to a tkinter friendly color code
+        """
+        return "#%02x%02x%02x" % rgb   
 
 
     def about(self):
