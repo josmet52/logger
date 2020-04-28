@@ -26,15 +26,15 @@ class Main:
 
         # version infos
         self.VERSION_NAME = "Monitor" 
-        self.VERSION_NO = "0.01.03" 
-        self.VERSION_DATE = "27.04.2020"
+        self.VERSION_NO = "0.02.00" 
+        self.VERSION_DATE = "28.04.2020"
         self.VERSION_DESCRIPTION = "start of the new version 'monitor' without states"
         self.VERSION_STATUS = "in development"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
         # variables de controle
         self._job = None
-        self.t_pause = 5000 # 60 secondes 
+        self.t_pause = 60000 # 60 secondes 
         self.n_passe = 0
         # initialize self.t_elapsed to 0 seconds
         self.t_elapsed = datetime.now() - datetime.now() 
@@ -69,7 +69,7 @@ class Main:
 #         self.local_ip = self.mysql_logger.local_ip
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 0.5
+        self.NBRE_DAYS_ON_GRAPH = 48/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -114,13 +114,11 @@ class Main:
         self.display_trace_boiler_ft = IntVar(self.tk_root)
         
         # states pac et boiler
-#         self.display_trace_pac_on_off = IntVar(self.tk_root)
-#         self.display_trace_boiler_on_off = IntVar(self.tk_root)
-
         self.display_trace_pump_boiler = IntVar(self.tk_root)
         self.display_trace_pump_home = IntVar(self.tk_root)
         self.display_trace_boiler_on = IntVar(self.tk_root)
         self.display_trace_pac_on = IntVar(self.tk_root)
+        self.pixels_heigt_for_states = 25
 
         # affichages des valeurs sur le curseur de la souris
         self.display_valeur_x = IntVar(self.tk_root)
@@ -181,9 +179,7 @@ class Main:
         
         #variables pour les différents zooms
         self.zoom_active = False # scale xy amnuel ou automatique
-        # entrée de menu pour initialiser le zoom sur une zone
-        self.mouse_place_cursor_or_select_area = IntVar(self.tk_root)
-        self.mouse_place_cursor_or_select_area.set(False)
+        
         # variables pour les coordonnées de la zone
         self.select_area_x1 = 0
         self.select_area_x2 = 0
@@ -262,6 +258,35 @@ class Main:
         self.COLOR_PUMP_HOME = self.color_from_rgb(color_list[20])
         self.COLOR_PAC_ON_OFF = self.color_from_rgb(color_list[21])
         self.COLOR_BOILER_ON_OFF = self.color_from_rgb(color_list[22])
+
+        # afficheurs
+        self.COLOR_SALON = self.color_from_rgb((199, 77, 127))
+        self.COLOR_BUREAU = self.color_from_rgb((106, 150, 193))
+        self.COLOR_EXT = self.color_from_rgb((32, 110, 224))
+        self.COLOR_PAC_VAL = self.color_from_rgb((199, 84, 29))
+        # pac
+        self.COLOR_FROM_PAC = self.color_from_rgb((190, 118, 112))
+        self.COLOR_TO_PAC = self.color_from_rgb((207, 15, 110))
+        self.COLOR_FROM_ACCU = self.color_from_rgb((19, 36, 161))
+        self.COLOR_ON_BYPASS = self.color_from_rgb((199, 155, 117))
+        self.COLOR_FT_PAC = self.color_from_rgb((210, 165, 0))
+        # home
+        self.COLOR_TO_HOME = self.color_from_rgb((38, 103, 191))
+        self.COLOR_FROM_REZ = self.color_from_rgb((162, 41, 10))
+        self.COLOR_FROM_1ER = self.color_from_rgb((124, 165, 155))
+        self.COLOR_FROM_HOME = self.color_from_rgb((0, 136, 124))
+        self.COLOR_FROM_BYPASS = self.color_from_rgb((242, 18, 44))
+        self.COLOR_FT_HOME = self.color_from_rgb((239, 2, 193))
+        # boiler
+        self.COLOR_TO_BOILER = self.color_from_rgb((251, 143, 136))
+        self.COLOR_IN_BOILER = self.color_from_rgb((196, 42, 237))
+        self.COLOR_FROM_BOILER = self.color_from_rgb((174, 175, 150))
+        self.COLOR_FT_BOILER = self.color_from_rgb((63, 54, 80))
+        # states
+        self.COLOR_PUMP_BOILER = self.color_from_rgb((35, 221, 253))#191, 170, 138))
+        self.COLOR_PUMP_HOME = self.color_from_rgb((158, 153, 182))#168, 186, 213))
+        self.COLOR_PAC_ON_OFF = self.color_from_rgb((255, 0, 0))
+        self.COLOR_BOILER_ON_OFF = self.color_from_rgb((172, 159, 120))
         
         self.GRID_COLOR = "silver"
         self.RECTANGLE_COLOR = "purple"
@@ -275,7 +300,7 @@ class Main:
         self.BG_COLOR_SELECTED = "red"
         self.BG_COLOR_UNUSED = "gray75"
         self.BG_COLOR_LABEL = "grey95"
-        
+        self.COLOR_BG_CANVAS = "gray90" # "azure"       
         self.CURSOR_X_COLOR = "red" # "gray25"
         self.CURSOR_Y_COLOR = "blue" # "gray50"
 
@@ -425,25 +450,9 @@ class Main:
         v_column += v_column_span
         tk.Label(self.tk_root, text = "--- Boiler f-t", pady = v_pady, fg = self.COLOR_FT_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
-        
-#         v_row = 4
-#         v_column_span = 3
-#         v_column = 0
-#         
-#         # Pumps and states
-#         tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
-#         v_column += 1
-#         
-#         tk.Label(self.tk_root, text = "--- Pump boiler", pady = v_pady, fg = self.COLOR_PUMP_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-#         v_column += v_column_span
-#         tk.Label(self.tk_root, text = "--- Pump pac", pady = v_pady, fg = self.COLOR_PUMP_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-#         v_column += v_column_span
-#         tk.Label(self.tk_root, text = "--- Pac onoff", pady = v_pady, fg = self.COLOR_PAC_ON_OFF, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-#         v_column += v_column_span
-#         tk.Label(self.tk_root, text = "--- Boiler on-off", pady = v_pady, fg = self.COLOR_BOILER_ON_OFF, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
  
         # initialize le canvas pour le graphique des températures
-        self.cnv = tk.Canvas(bg = "azure", height = 0.8 * self.win_height, width = self.win_width)
+        self.cnv = tk.Canvas(bg = self.COLOR_BG_CANVAS, height = 0.8 * self.win_height, width = self.win_width)
 
         # create the menus
         menubar = Menu(self.tk_root)
@@ -502,9 +511,6 @@ class Main:
 #         curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
         curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
-
-#         curvesmenu.add_checkbutton(label="PAC on/off", font = self.FONT_LABEL, variable = self.display_trace_pac_on_off, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Boiler on/off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on_off, command = self.change_curves_on_display)
         curvesmenu.add_separator()
         curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
         curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
@@ -514,16 +520,14 @@ class Main:
         mesuremenu = Menu(menubar, tearoff=0)
         mesuremenu.add_checkbutton(label="Temps", font = self.FONT_LABEL, variable = self.display_valeur_x)
         mesuremenu.add_checkbutton(label="Température", font = self.FONT_LABEL, variable = self.display_valeur_y)
-#         mesuremenu.add_separator()
-#         mesuremenu.add_command(label="Remove cursors", font = self.FONT_LABEL, command=self.remove_cursors)
+        mesuremenu.add_separator()
+        mesuremenu.add_command(label="Remove cursors", font = self.FONT_LABEL, command=self.remove_cursors)
         menubar.add_cascade(label="Mesures", font = self.FONT_LABEL, menu=mesuremenu)
         
         # menu zooms
         self.zoommenu = Menu(menubar, tearoff=0)
         self.zoommenu.add_command(label="Zoom x", font = self.FONT_LABEL, command=self.set_x_scale_change)
         self.zoommenu.add_command(label="Zoom y", font = self.FONT_LABEL, command=self.set_y_scale_change)
-        self.zoommenu.add_separator()
-        self.zoommenu.add_checkbutton(label="Zoom selection", font = self.FONT_LABEL, variable = self.mouse_place_cursor_or_select_area, command=self.select_xy_scale_change)
         self.zoommenu.add_separator()
         self.zoommenu.add_command(label="Supress all zooms", font = self.FONT_LABEL, command=self.supress_all_zooms)
         menubar.add_cascade(label="Zooms", font = self.FONT_LABEL, menu=self.zoommenu)
@@ -563,7 +567,6 @@ class Main:
         # PAC
         self.val_pac.set("".join([str(int(self.pac_on_off)), " %"]))
 
-
         # read the database for data's for graph
         print("Loading data's")
         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
@@ -581,8 +584,9 @@ class Main:
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
         self.data_from_db = list(self.data_from_db)
         
-#         # initialize the last id in the graph_data
-#         self.last_id = self.data_from_db[len(self.data_from_db) - 1][19]
+        # initialize the last id in the graph_data
+        self.index_first_displayed_record = 0
+        self.index_last_displayed_record = self.data_from_db[len(self.data_from_db) - 1][19]
         self.refresh_display()
         
 
@@ -591,17 +595,12 @@ class Main:
         
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
         row = self.mysql_logger.get_last_mesured_temperature()
-#         pdb.set_trace()
-#         t_start = row[0]
+        
         # affichage des passes
         self.n_passe += 1
         self.tk_root.title("".join(["TMON on ", self.ip_db_server,": ", "passe:", str(self.n_passe), "--> t=", "{0:.2f}".format(self.t_elapsed.total_seconds()), "[s])"])) 
         
         # initialisation des variables internes
-        data_for_graph = []
-        # créer la list data_for_graph -> parcourir tous les data's de data_from_db
-        for row in self.data_from_db:
-            # ajouter à data_for_graph
             
             # ------------------------------------------------------------
             # index dans data_from_db et data_for_graph et noms des champs
@@ -629,8 +628,13 @@ class Main:
             # 19      id
             # ------------------------------------------------------------
         
-            data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
-                                   row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19]])
+        data_for_graph = []
+        # créer la list data_for_graph -> parcourir tous les data's de data_from_db
+        for i, row in enumerate(self.data_from_db):
+            # ajouter à data_for_graph
+            if i >= self.index_first_displayed_record and i <= self.index_last_displayed_record:
+                data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
+                                       row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19]])
 
         # index du dernier enregistrement
         self.last_id = data_for_graph[len(data_for_graph)-1][19]
@@ -702,14 +706,17 @@ class Main:
         
         # PAC label only if PAC or boiler is displayed
         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
-#         if self.display_trace_pac_on_off.get() or self.display_trace_boiler_on_off.get():
             y_pos = self.echelle_y_min + self.graduation_step / 3
+            
             y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *0.25  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
+            
             y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *1 + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_BOILER, text = "Boiler")
+            
             y_sur_axe =  y_val_to_pix * (y_pos - self.echelle_y_min) *1.75  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_HOME, text = "Home")
+            
             min_y_label = self.graduation_step
         else:
             min_y_label = 0
@@ -727,7 +734,7 @@ class Main:
         
         # labels and grid for x axis
         # allways 12 mark on this axis
-        tic_space = self.nbre_hours_on_graph / 18
+        tic_space = self.nbre_hours_on_graph / 12
         # get the correlation between pixels and hours 
         x_val_to_pix = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph
         
@@ -884,15 +891,30 @@ class Main:
                     old_y_boiler_ft = y
                     
                 # pumps
+                # épaisseur du trait = pixels / minutes et un peu plus
+                pump_line_width = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
                 if self.display_trace_pump_boiler.get() and mes[15] != -1:
                     s_pump_boiler = mes[15]
-                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-                    self.cnv.create_line(x, self.Y_MIN, x, y, width=5, fill=self.COLOR_PUMP_BOILER)
+                    y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+                    self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_BOILER)
                      
                 if self.display_trace_pump_home.get() and mes[16] != -1:
                     s_pump_home = mes[16]
-                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-                    self.cnv.create_line(x, self.Y_MIN, x, y, width=5, fill=self.COLOR_PUMP_HOME)
+                    y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+                    self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
+                    
+#                 # pumps
+#                 if self.display_trace_pump_boiler.get() and mes[15] != -1:
+#                     s_pump_boiler = mes[15]
+#                     y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+#                     self.cnv.create_line(old_x, old_y_pump_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PUMP_BOILER)
+#                     old_y_pump_boiler = y
+#                      
+#                 if self.display_trace_pump_home.get() and mes[16] != -1:
+#                     s_pump_home = mes[16]
+#                     y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+#                     self.cnv.create_line(old_x, old_y_pump_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PUMP_HOME)
+#                     old_y_pump_home = y
                      
 #                 if self.display_trace_pac_on.get() and mes[17] != -1:
 #                     s_pac_onoff = mes[17]
@@ -900,12 +922,12 @@ class Main:
 #                     self.cnv.create_line(old_x, old_y_pac_onoff, x, y , width=self.TRACE_WIDTH, fill=self.COLOR_PAC_ON_OFF)
 #                     old_y_pac_onoff = y
                      
+                self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
                 if self.display_trace_pac_on.get() and mes[17] != -1:
                     s_pac_onoff = mes[17]
                     y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
                     if s_pac_onoff == 1:
                         self.cnv.create_line(old_x, self.Y_MIN+2.5, x, self.Y_MIN+2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
-#                     old_y_pac_onoff = y
                 
                 old_x = x
 
@@ -990,12 +1012,19 @@ class Main:
                     old_y_boiler_ft = y_val_to_pix * (t_boiler_ft - self.echelle_y_min) + self.Y_MIN
                 
                 # states 
+                if self.display_trace_pump_boiler.get() and mes[15] != -1:
+                    s_pump_boiler = mes[15]
+                    old_y_pump_boiler = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+                     
+                if self.display_trace_pump_home.get() and mes[16] != -1:
+                    s_pump_home = mes[16]
+                    old_y_pump_home = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+                   
                 if self.display_trace_pac_on.get():
                     s_pac_onoff = mes[17]
                     old_y_pac_onoff = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
                     
                 old_x = old_x
-
             
         self.t_elapsed = datetime.now() - t_start
         secondes_decimales_str = str(self.t_elapsed).split(".")[1]
@@ -1014,8 +1043,6 @@ class Main:
 
             p_str = "".join(["passe:", str(self.n_passe)])
             p_str += "".join([" n_row:", str(n_row), " removed:"])
-
-#             pdb.set_trace()
 
             # remove the old(s) record(s) in the data_from_db list
             while n_removed < n_row:
@@ -1038,25 +1065,28 @@ class Main:
             
             # if more then one record print a message
             if n_row > 1 : print(p_str)
+            
+            # recreate cursors if exists
+            pixels_pro_minute = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60
+            pixels_shift_left = n_removed * pixels_pro_minute
+
+            tmp_mouse_pos_cursors_x = list(self.mouse_pos_cursors_x)
+            self.mouse_pos_cursors_x.clear()
+            self.mouse_cursors_x.clear()
+
+            for mouse_pos_cursor_x in tmp_mouse_pos_cursors_x:
+                new_x = mouse_pos_cursor_x - pixels_shift_left
+                self.mouse_cursors_x.append(self.cnv.create_line(new_x, self.Y_MIN, new_x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
+                self.mouse_pos_cursors_x.append(new_x)
+                
+            self.mouse_cursors_y.clear()
+            for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
+                self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
         # pause the program for a while (t_pause) and after that restat it
 #         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
 #                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
         self._job = self.tk_root.after(t_pause, self.refresh_display)
-
-
-    def select_xy_scale_change(self):
-        
-        # zoom active --> disable all zoom menu
-        # no zoom on zoom possible actualy
-        self.zoommenu.entryconfig(0,state=DISABLED)
-        self.zoommenu.entryconfig(1,state=DISABLED)
-        self.zoommenu.entryconfig(3,state=DISABLED)
-        
-        if self.mouse_place_cursor_or_select_area.get():
-            self.cnv.configure(cursor = "dotbox green")
-        else:
-            self.cnv.configure(cursor = "tcross black")
 
     def set_x_scale_change(self):
         
@@ -1077,8 +1107,8 @@ class Main:
         tk.Label(ask_window, text="x max").grid(row = 1, column = 0)
         tk.Entry(ask_window, textvariable = get_x_max).grid(row = 1, column = 1)
         # configure the buttons
-        tk.Button(ask_window, text='cancel', command = lambda: self.apply_x_scale_change("cancel", ask_window, \
-                                             get_x_min.get(), get_x_max.get())).grid(row = 3)
+        tk.Button(ask_window, text='cancel', command = lambda: self.apply_x_scale_change(" cancel ", ask_window, \
+                                             get_x_min.get(), get_x_max.get())).grid(row = 3, sticky = tk.W)
         tk.Button(ask_window, text='Default', command = lambda: self.apply_x_scale_change("default", ask_window, \
                                              get_x_min.get(), get_x_max.get())).grid(row = 3, column = 1)
         tk.Button(ask_window, text='OK', default = "active",  command = lambda: self.apply_x_scale_change("ok", ask_window, \
@@ -1102,7 +1132,6 @@ class Main:
         # set the default value for the zoom
         self.zoom_active = False
         # set the default value for the zoom's menu entry
-        menu_state = tk.NORMAL
         
         # ok button pressed
         if v_choice == "ok":
@@ -1112,13 +1141,6 @@ class Main:
                 msg = "la valeur de x min doit être plus petite que x max"
                 tk.messagebox.showwarning("Erreur", msg)
             else:
-                # read the database for data's for graph
-#                 self.read_data = self.mysql_jo.get_temp_for_graph_begin_end(time_begin_mesure, time_end_mesure) # nbre_hours_on_graph
-#                 self.data_from_db: list = []
-#                 for row in self.read_data:
-#                     self.data_from_db.append(row)
-#                 # initialize the last id in the graph_data
-#                 self.last_id = self.data_from_db[len(self.data_from_db) - 1][1]
                 # values seems to be good so search indexes for min and max
                 min_found = False
                 max_found = False
@@ -1134,26 +1156,15 @@ class Main:
                 # set the zoom indicator
                 self.zoom_active = True
                 # to disable the zooms menus
-                menu_state = tk.DISABLED
                 self.refresh_display()
                 
         elif v_choice == "default":
             self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
             self.remove_cursors()
-            
-        self.zoommenu.entryconfig(0,state=menu_state)
-        self.zoommenu.entryconfig(1,state=menu_state)
-        self.zoommenu.entryconfig(3,state=menu_state)
 
     # define the y axis zoom
     def set_y_scale_change(self):
         
-        # zoom active --> disable all zoom menu
-        # no zoom on zoom possible actualy
-        self.zoommenu.entryconfig(0,state=DISABLED)
-        self.zoommenu.entryconfig(1,state=DISABLED)
-        self.zoommenu.entryconfig(3,state=DISABLED)
-
         # create the window
         ask_window = tk.Toplevel(self.tk_root)
         ask_window.geometry("+%d+%d" % (self.win_width/2, self.win_height/2))
@@ -1191,7 +1202,6 @@ class Main:
 
     def select_database_ip(self, ip_adress):
         
-#         pdb.set_trace()
         self.ip_db_server = ip_adress
         self.mysql_logger = Mysql(self.ip_db_server)
         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)        
@@ -1208,7 +1218,6 @@ class Main:
         self.cnv.update()
         
         # mettre à jour l'affichage
-#         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
         self.refresh_display()
 
 
@@ -1216,7 +1225,7 @@ class Main:
     def change_days_on_display(self, nbre_days):
         
         # tuer la tache en cours
-#         self.kill_repetition_job()
+        self.kill_repetition_job()
         
         # efface le graphique et affiche working pendant le travail
         self.cnv.delete("all")
@@ -1265,9 +1274,6 @@ class Main:
             self.display_trace_boiler_ft.set(not self.display_trace_boiler_ft.get())
 
         if who == "states":
-#             self.display_trace_pac_on_off.set(not self.display_trace_pac_on_off.get())
-#             self.display_trace_boiler_on_off.set(not self.display_trace_boiler_on_off.get())
-            
             self.display_trace_pump_boiler.set(not self.display_trace_pump_boiler.get())
             self.display_trace_pump_home.set(not self.display_trace_pump_home.get()) 
             self.display_trace_boiler_on.set(not self.display_trace_boiler_on.get()) 
@@ -1295,9 +1301,6 @@ class Main:
             self.display_trace_in_boiler.set(False)
             self.display_trace_from_boiler.set(False)
             self.display_trace_boiler_ft.set(False)
-            
-#             self.display_trace_pac_on_off.set(False)
-#             self.display_trace_boiler_on_off.set(True)
             
         if who == "all": 
             self.display_trace_salon.set(True)
@@ -1331,8 +1334,6 @@ class Main:
         # close the window
         ask_window.destroy()
         self.zoom_active = False
-        # set the default value for the zoom's menu entry
-        menu_state = tk.NORMAL
         
         # ok 
         if v_choice == "ok":
@@ -1348,35 +1349,23 @@ class Main:
                 self.echelle_y_max = get_y_max
                 self.graduation_step = get_graduation_step
                 self.zoom_active = True
-                menu_state = tk.DISABLED
+#                 menu_state = tk.DISABLED
                 self.refresh_display()
             
         elif v_choice == "default":
             # reset the graduation to default
             self.graduation_step = self.get_y_graduation_step(self.echelle_y_min, self.echelle_y_max)
-            
-        # apply the menu status
-        self.zoommenu.entryconfig(0,state=menu_state)
-        self.zoommenu.entryconfig(1,state=menu_state)
-        self.zoommenu.entryconfig(3,state=menu_state)
-
 
     def supress_all_zooms(self):
-        
-        # enable all zooms
-        self.zoommenu.entryconfig(0,state=NORMAL)
-        self.zoommenu.entryconfig(1,state=NORMAL)
-        self.zoommenu.entryconfig(3,state=NORMAL)
 
         # reinitialize the params ans the datas and display graph
-        self.mouse_place_cursor_or_select_area.set(False)
         self.zoom_active = False
         self.graduation_step = self.get_y_graduation_step(self.echelle_y_min, self.echelle_y_max)
         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
 
 
     def on_mouse_manage(self, event):
-        
+
         # LEFT MOUSE BUTTON
         # left mouse button in the graph --> cursor
         if str(event.type) == "ButtonPress" and event.num == 1 and event.x >= self.X_MIN and event.x <= self.X_MAX:
@@ -1384,107 +1373,86 @@ class Main:
             self.mouse_x = event.x
             self.mouse_y = event.y
             
-            if self.mouse_place_cursor_or_select_area.get():
-                self.select_area_x1 = event.x
-                self.select_area_y1 = event.y
-                self.added_rectangle.append(self.cnv.create_rectangle(self.select_area_x1, self.select_area_y1, self.select_area_x1, self.select_area_y1, dash=(2, 4), outline=self.RECTANGLE_COLOR))
-            else:
-                self.mouse_events_x.append(self.cnv.create_line(event.x, self.X_MIN, event.x, self.X_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
+            self.select_area_x1 = event.x
+            self.select_area_y1 = event.y
+            self.added_rectangle.append(self.cnv.create_rectangle(self.select_area_x1, self.select_area_y1, self.select_area_x1, self.select_area_y1, dash=(2, 4), outline=self.RECTANGLE_COLOR))
             
         # mouse move while left button pressed in the graph --> cursor
         if str(event.type) == "Motion"  and event.state == 272 and event.x >= self.X_MIN and event.x <= self.X_MAX: # state 272 = left button
                 
-            if self.mouse_place_cursor_or_select_area.get():
-                if abs(event.x - self.mouse_x) > 2 or abs(event.y - self.mouse_y) > 2:
-                    for rectangle in self.added_rectangle:
-                        self.cnv.delete(rectangle)
-                    self.select_area_x2 = event.x
-                    self.select_area_y2 = event.y
-                    self.added_rectangle.append(self.cnv.create_rectangle(self.select_area_x1, self.select_area_y1, self.select_area_x2, self.select_area_y2, dash=(2, 4), outline=self.RECTANGLE_COLOR))
-            else:
-                if abs(event.x - self.mouse_x) > 2:
-                    for mouse_event in self.mouse_events_x:
-                        self.cnv.delete(mouse_event)
-                    self.mouse_events_x.append(self.cnv.create_line(event.x, self.Y_MIN, event.x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
-                    self.get_cursor_label(event)
-                    self.mouse_x = event.x
-                    self.mouse_y = event.y
-            
-        # mouse button release while left button pressed
-        if str(event.type) == "ButtonRelease"  and event.num == 1 and event.x >= self.X_MIN and event.x <= self.X_MAX:
-            
-            if self.mouse_place_cursor_or_select_area.get():
-                
+            if abs(event.x - self.mouse_x) > 2 or abs(event.y - self.mouse_y) > 2:
                 for rectangle in self.added_rectangle:
                     self.cnv.delete(rectangle)
-                self.added_rectangle.clear()
+                self.select_area_x2 = event.x
+                self.select_area_y2 = event.y
+                self.added_rectangle.append(self.cnv.create_rectangle(self.select_area_x1, self.select_area_y1, self.select_area_x2, self.select_area_y2, dash=(2, 4), outline=self.RECTANGLE_COLOR))
+            
+        # mouse button release while left button pressed
+        if str(event.type) == "ButtonRelease"  and event.num == 1 \
+        and event.x >= self.X_MIN and event.x <= self.X_MAX \
+        and abs(self.select_area_x1 - event.x) > 10 \
+        and abs(self.select_area_y1 - event.y) > 10:
+                
+            for rectangle in self.added_rectangle:
+                self.cnv.delete(rectangle)
+            self.added_rectangle.clear()
 
 # tbd #2    --> provisoirement on supprime tous les cuseurs de mesure
 #           --> voir tbd #2 dans refresh_display()
-                self.remove_cursors()
+            self.remove_cursors()
 # fin tbd
 
-                self.select_area_x2 = event.x
-                self.select_area_y2 = event.y
-                if self.select_area_x1 > self.select_area_x2:
-                    self.select_area_x1, self.select_area_x2 = self.select_area_x2, self.select_area_x1
-                if self.select_area_y1 > self.select_area_y2:
-                    self.select_area_y1, self.select_area_y2 = self.select_area_y2, self.select_area_y1
+            self.select_area_x2 = event.x
+            self.select_area_y2 = event.y
+            if self.select_area_x1 > self.select_area_x2:
+                self.select_area_x1, self.select_area_x2 = self.select_area_x2, self.select_area_x1
+            if self.select_area_y1 > self.select_area_y2:
+                self.select_area_y1, self.select_area_y2 = self.select_area_y2, self.select_area_y1
 
-                 # here the zoom to be designed   
-                x_min_seconds = (self.select_area_x1 - self.X_MIN) * (self.echelle_x_max - self.echelle_x_min) / (self.X_MAX - self.X_MIN) + self.echelle_x_min
-                x_min_date = datetime.fromtimestamp(x_min_seconds).strftime('%Y-%m-%d \n%H:%M:%S')
-                x_max_seconds = (self.select_area_x2 - self.X_MIN) * (self.echelle_x_max - self.echelle_x_min) / (self.X_MAX - self.X_MIN) + self.echelle_x_min
-                x_max_date = datetime.fromtimestamp(x_max_seconds).strftime('%Y-%m-%d \n%H:%M:%S')
+             # here the zoom to be designed   
+            x_min_seconds = (self.select_area_x1 - self.X_MIN) * (self.echelle_x_max - self.echelle_x_min) / (self.X_MAX - self.X_MIN) + self.echelle_x_min
+            x_min_date = datetime.fromtimestamp(x_min_seconds).strftime('%Y-%m-%d %H:%M:%S')
+            x_min_date = datetime.strptime(x_min_date, '%Y-%m-%d %H:%M:%S')
+            
+            x_max_seconds = (self.select_area_x2 - self.X_MIN) * (self.echelle_x_max - self.echelle_x_min) / (self.X_MAX - self.X_MIN) + self.echelle_x_min
+            x_max_date = datetime.fromtimestamp(x_max_seconds).strftime('%Y-%m-%d %H:%M:%S')
+            x_max_date = datetime.strptime(x_max_date, '%Y-%m-%d %H:%M:%S')
+
+            self.nbre_hours_on_graph = abs(x_max_date - x_min_date).seconds / 3600
+
+            
+            min_found = False
+            max_found = False
+            for i, row in enumerate(self.data_from_db):
                 
-                min_found = False
-                max_found = False
-                for i, row in enumerate(self.data_from_db):
+                if row[18] >= x_min_date and not min_found:
+                    self.index_first_displayed_record = i
+                    min_found = True
+                    print("index_first_displayed_record",self.index_first_displayed_record)
                     
-                    if row[18] >= datetime.strptime(x_min_date, '%Y-%m-%d %H:%M:%S') and not min_found:
-                        self.index_first_displayed_record = i
-                        min_found = True
-                        
-                    if row[18] >= datetime.strptime(x_max_date, '%Y-%m-%d %H:%M:%S') and not max_found:
-                        self.index_last_displayed_record  = i
-                        max_found = True
-                y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
-                y_max_celsius = (self.select_area_y2 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
-                self.echelle_y_min = y_max_celsius
-                self.echelle_y_max = y_min_celsius
-                self.graduation_step = self.get_y_graduation_step(self.echelle_y_min, self.echelle_y_max)
+                if row[18] >= x_max_date and not max_found:
+                    self.index_last_displayed_record  = i
+                    max_found = True
+                    print("index_last_displayed_record",self.index_last_displayed_record)
+            
+            y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
+            y_max_celsius = (self.select_area_y2 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
+            self.echelle_y_min = y_max_celsius
+            self.echelle_y_max = y_min_celsius
+            
+            self.graduation_step = self.get_y_graduation_step(self.echelle_y_min, self.echelle_y_max)
 
-
-
-
-
-
-
-
-                self.mouse_place_cursor_or_select_area.set(False)
-                self.cnv.configure(cursor = "tcross black")
-                
-#                 self.man_x_scale = True
-#                 self.man_y_scale = True
-                self.zoom_active = True
-                
-#                 self.display_trace_pac_on_off.set(False)
-#                 self.display_trace_boiler_on_off.set(False)
-                
-                self.refresh_display()
-            else:
-                for mouse_event in self.mouse_events_x:
-                    self.cnv.delete(mouse_event)
-                self.mouse_events_x.clear()
-                    
-                self.mouse_cursors_x.append(self.cnv.create_line(event.x, self.Y_MIN, event.x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
-                self.mouse_pos_cursors_x.append(event.x)
+            self.cnv.configure(cursor = "tcross black")
+            self.zoom_active = True
+            
+            self.refresh_display()
 
         # RIGHT MOUSE BUTTON
         # right mouse button
         if str(event.type) == "ButtonPress" and event.num == 3 and event.y >= self.Y_MIN and event.y <= self.Y_MAX:
             self.mouse_y = event.y
             self.mouse_events_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+            self.mouse_events_x.append(self.cnv.create_line(event.x, self.X_MIN, event.x, self.X_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
 
         # mouse move while right button pressed
         if str(event.type) == "Motion"  and event.state == 1040 and event.y <= self.Y_MIN and event.y >= self.Y_MAX: # state 1040 = right button
@@ -1495,10 +1463,14 @@ class Main:
                     self.cnv.delete(mouse_event)
                     
                 self.mouse_events_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+
+                for mouse_event in self.mouse_events_x:
+                    self.cnv.delete(mouse_event)
+                self.mouse_events_x.append(self.cnv.create_line(event.x, self.Y_MIN, event.x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
+                self.get_mouse_cursor_label(event)
+                self.mouse_x = event.x
                 self.mouse_y = event.y
 
-                self.get_cursor_label(event)
-            
         # mouse button release while right button pressed
         if str(event.type) == "ButtonRelease"  and event.num == 3 and event.y <= self.Y_MIN and event.y >= self.Y_MAX:
             
@@ -1506,8 +1478,15 @@ class Main:
                 self.cnv.delete(mouse_event)
             self.mouse_events_y.clear()
                 
-            self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+            self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))    
             self.mouse_pos_cursors_y.append(event.y)
+
+            for mouse_event in self.mouse_events_x:
+                self.cnv.delete(mouse_event)
+            self.mouse_events_x.clear()
+                
+            self.mouse_cursors_x.append(self.cnv.create_line(event.x, self.Y_MIN, event.x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
+            self.mouse_pos_cursors_x.append(event.x)
 
         #CENTER MOUSE BUTTOM
         # mouse center button pressed
@@ -1563,7 +1542,6 @@ class Main:
         nbre_div = 10
         etendue_echelle = abs(sc_y_max - sc_y_min)
         division = etendue_echelle / nbre_div
-        
         if division >= 1:
             n = ceil(division)
         else:
@@ -1581,10 +1559,6 @@ class Main:
         y_max = -99999
         y_min = 99999
         for t in graph_data:
-
-        # [0] -> timeStamp [1] -> id [2] -> from PAC [3] -> to PAC [4] -> from accu [5] -> On bypass [6] -> to home [7] -> from home
-        # [8] -> from bypass [9] -> to boiler [10] -> from boiler [11] -> salon [12] -> bureau [13] -> ext [14] -> from floor [15] -> from first
-        # [16] -> pac on-off [17] -> boiler on-off
 
             # afficheurs
             if self.display_trace_salon.get() and t[12] != -333:
@@ -1665,8 +1639,6 @@ class Main:
                 y_min = min(y_min, t_delta_boiler)
                 y_max = max(y_max, t_delta_boiler)
         
-#         pdb.set_trace()
-        
         if y_max < y_min:
             y_max = 20
             y_min = 0
@@ -1719,25 +1691,6 @@ class Main:
     def on_exit(self):
         self.kill_repetition_job()
         self.tk_root.destroy()
-        
-#     def main(self):
-# 
-#         # Get screen width and height
-#         screenWidth = self.tk_root.winfo_screenwidth()  # width of the screen
-#         screenHeight = self.tk_root.winfo_screenheight()  # height of the screen
-#         # Calculate the smaller dimention between screen and application
-#         maxWidth = min(self.win_width, screenWidth)
-#         maxHeight = min(self.win_height, screenHeight)
-#         # open the application window in the center horizontaly and to the top verticaly
-#         winPosX = (screenWidth / 2) - (int(maxWidth / 2))
-#         winPosY = (screenHeight / 2) - (int(maxHeight / 2))
-#         # fix the geometry os the formular
-#         self.tk_root.geometry('%dx%d+%d+%d' % (maxWidth, maxHeight, winPosX, winPosY))
-#         self.tk_root.title("TMON")
-#         self.tk_root.protocol("WM_DELETE_WINDOW", self.on_exit)
-#         img_tmp="/home/pi/Documents/projets_jo/tempLogger/nest.jpg"
-#         img=ImageTk.PhotoImage(Image.open(img_tmp))
-#         self.tk_root.call('wm','iconphoto',self.tk_root,img)
 
 ################################################################################################################################################################################
 
@@ -1745,7 +1698,6 @@ if __name__ == '__main__':
 
     tk_root = tk.Tk()
     main = Main(tk_root)
-#     main.main()
         
     tk_root.mainloop()
     
