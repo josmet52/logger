@@ -7,7 +7,6 @@ written by Joseph Metrailler
 2019-2020
 to display and graph our house temperatures
 """
-
 import tkinter as tk
 from tkinter import *
 
@@ -608,7 +607,7 @@ class Main:
     def refresh_display(self):
         
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
-        row = self.mysql_logger.get_last_mesured_temperature()
+#         row = self.mysql_logger.get_last_mesured_temperature()
         
         # affichage des passes
         self.n_passe += 1
@@ -644,16 +643,19 @@ class Main:
         
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
+        print("self.id_first_displayed_record:",self.id_first_displayed_record, "self.id_last_displayed_record:",self.id_last_displayed_record)
         for row in self.data_from_db:
             # ajouter à data_for_graph
             if row[19] >= self.id_first_displayed_record and row[19] <= self.id_last_displayed_record:
                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19]])
+        i_last = len(self.data_for_graph) - 1
+        print("len(self.data_for_graph):", len(self.data_for_graph))
 
         # index du dernier enregistrement
 #         self.index_of_last_data_for_graph_record = len(self.data_for_graph)-1
 #         self.id_last_fromdb_record = self.data_for_graph[self.index_of_last_data_for_graph_record][19]
-        self.id_last_fromdb_record = self.id_last_fromdb_record
+#         self.id_last_fromdb_record = self.id_last_fromdb_record
         
         # Calcul % PAC ON
         count_on = 0
@@ -670,7 +672,6 @@ class Main:
 #         pdb.set_trace()
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
-        i_last = len(self.data_for_graph) - 1
         self.t_salon = float(self.data_for_graph[i_last][12])
         self.t_bureau = float(self.data_for_graph[i_last][13])
         self.t_ext = float(self.data_for_graph[i_last][14])
@@ -1062,26 +1063,34 @@ class Main:
             # read the new(s) record(s) in the database
             self.read_data = self.mysql_logger.get_temp_to_complete_graph(self.id_last_fromdb_record) # id's bigger than self.id_last_fromdb_record
             n_row = len(self.read_data)
+            print(self.id_last_fromdb_record, n_row)
             n_removed = 0
 
             p_str = "".join(["passe:", str(self.n_passe)])
             p_str += "".join([" n_row:", str(n_row), " removed:"])
 
+            print("len(data_from_db begin):", len(self.data_from_db))
             # remove the old(s) record(s) in the data_from_db list
             while n_removed < n_row:
                 record_to_remove = self.data_from_db[0]
                 self.data_from_db.remove(record_to_remove)
                 n_removed += 1
                 p_str += "".join([str(record_to_remove[0]), "/"])
+            print("len(data_from_db after remove):", len(self.data_from_db))
                 
             # and add the now(s) record(s) in the data_from_db list
             p_str += " added:"
             for row in self.read_data:
                 self.data_from_db.append(row)
                 p_str += "".join([str(row[0]), "/"])
+            print("len(data_from_db after add):", len(self.data_from_db), "\n")
             
-            # adapt the id of the last recors
+            # adapt the id of the last records
             self.id_last_fromdb_record = self.data_from_db[-1][19]
+            
+#             self.id_first_displayed_record += n_removed
+#             self.id_last_displayed_record += n_removed
+            self.id_last_displayed_record = self.id_last_fromdb_record
             
             p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
             p_str += "".join([" t_pause:", str(t_pause), "ms t_elapsed:", str(t_elapsed), "ms"])
@@ -1393,6 +1402,7 @@ class Main:
 
         # LEFT MOUSE BUTTON
         # left mouse button in the graph area --> rectangle pour zoom
+#         print(event.type, event.num, event.state)
         if str(event.type) == "ButtonPress" and event.num == 1 and event.x >= self.X_MIN and event.x <= self.X_MAX:
             
             self.mouse_x = event.x
@@ -1410,6 +1420,8 @@ class Main:
                 self.id_first_displayed_record -= 1
                 self.id_last_displayed_record -= 1
                 self.refresh_display()
+                self.cnv.configure(cursor = "sb_left_arrow")
+
 #                 print(self.id_first_displayed_record, self.id_first_fromdb_record)
                 
             if self.mouse_scroll_right and (self.id_last_displayed_record < self.id_last_fromdb_record):
@@ -1417,11 +1429,12 @@ class Main:
                 self.id_first_displayed_record += 1
                 self.id_last_displayed_record += 1
                 self.refresh_display()
+                self.cnv.configure(cursor = "sb_right_arrow")
+
 #                 print(self.id_last_displayed_record, self.id_last_fromdb_record)
             
         # mouse move while left button pressed in the graph --> cursor
         if str(event.type) == "Motion"  and event.state == 272 and event.x >= self.X_MIN and event.x <= self.X_MAX: # state 272 = left button
-                
             if abs(event.x - self.mouse_x) > 2 or abs(event.y - self.mouse_y) > 2:
                 for rectangle in self.added_rectangle:
                     self.cnv.delete(rectangle)
@@ -1435,6 +1448,7 @@ class Main:
         and abs(self.select_area_x1 - event.x) > 10 \
         and abs(self.select_area_y1 - event.y) > 10:
                 
+            self.kill_repetition_job()
             for rectangle in self.added_rectangle:
                 self.cnv.delete(rectangle)
             self.added_rectangle.clear()
