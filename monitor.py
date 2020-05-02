@@ -18,7 +18,35 @@ import pdb
 
 class Main:
     
-    """ Cette classe permet d'afficher les graphiques des températures
+    """ Cette classe permet d'afficher les graphiques des températures enregistrée dans
+        la base de donnée 'logger' (par defaut sur mysql server '192.168.1.139')
+        ------------------------------------------------------------
+        index : dans data_from_db et data_for_graph
+        field name : nom du champ dans la base de donnée
+        ------------------------------------------------------------
+        index   field name  designation
+        0       t0          from pac
+        1       t1          to pac
+        2       t2          from accu
+        3       t3          on bypass
+        4       t4          to home
+        5       t5          from home rez
+        6       t6          from home 1er
+        7       t7          from home
+        8       t8          from bypass
+        9       t9          to boiler
+        10      t10         in boiler
+        11      t11         from boiler
+        12      t12         salon
+        13      t13         bureau
+        14      t14         exterieur
+        15      s10         pump boiler
+        16      s11         pump home
+        17      s20         pac on-off
+        18      s21         boiler on-off
+        19      time_stamp  date tiem acquisition
+        20      id          id du record 
+        ------------------------------------------------------------
     """
     
     def __init__(self, tk_root):
@@ -54,7 +82,6 @@ class Main:
 
         self.win_pos_x = (self.win_width_th - self.win_width) / 2
         self.win_pos_y = (self.win_height_th - self.win_height) / 20
-#         pdb.set_trace()
         print("win size :" , self.win_width, "x", self.win_height)
         
         # main windows
@@ -226,40 +253,40 @@ class Main:
         self.FONT_TEMP = "".join(["Helvetica ",str(int(70*self.win_width/self.max_width))])
 
         # couleurs
-        color_list = [(199, 77, 127),(106, 150, 193),(32, 110, 224),(199, 84, 29),(190, 118, 112),(207, 15, 110),
-                      (19, 36, 161),(199, 155, 117),(210, 165, 0),(38, 103, 191),(162, 41, 10),(124, 165, 155),
-                      (0, 136, 124),(242, 18, 44),(239, 2, 193),(251, 143, 136),(196, 42, 237),(174, 175, 150),
-                      (63, 54, 80),(191, 170, 138),(168, 186, 213),(255, 0, 0),(172, 159, 120),(242, 44, 141),
-                      (158, 29, 64),(157, 196, 40),(162, 202, 79),(241, 193, 254),(75, 107, 176),(44, 122, 217)]
-
-        # afficheurs
-        self.COLOR_SALON = self.color_from_rgb(color_list[0])
-        self.COLOR_BUREAU = self.color_from_rgb(color_list[1])
-        self.COLOR_EXT = self.color_from_rgb(color_list[2])
-        self.COLOR_PAC_VAL = self.color_from_rgb(color_list[3])
-        # pac
-        self.COLOR_FROM_PAC = self.color_from_rgb(color_list[4])
-        self.COLOR_TO_PAC = self.color_from_rgb(color_list[5])
-        self.COLOR_FROM_ACCU = self.color_from_rgb(color_list[6])
-        self.COLOR_ON_BYPASS = self.color_from_rgb(color_list[7])
-        self.COLOR_FT_PAC = self.color_from_rgb(color_list[8])
-        # home
-        self.COLOR_TO_HOME = self.color_from_rgb(color_list[9])
-        self.COLOR_FROM_REZ = self.color_from_rgb(color_list[10])
-        self.COLOR_FROM_1ER = self.color_from_rgb(color_list[11])
-        self.COLOR_FROM_HOME = self.color_from_rgb(color_list[12])
-        self.COLOR_FROM_BYPASS = self.color_from_rgb(color_list[13])
-        self.COLOR_FT_HOME = self.color_from_rgb(color_list[14])
-        # boiler
-        self.COLOR_TO_BOILER = self.color_from_rgb(color_list[15])
-        self.COLOR_IN_BOILER = self.color_from_rgb(color_list[16])
-        self.COLOR_FROM_BOILER = self.color_from_rgb(color_list[17])
-        self.COLOR_FT_BOILER = self.color_from_rgb(color_list[18])
-        # states
-        self.COLOR_PUMP_BOILER = self.color_from_rgb(color_list[19])
-        self.COLOR_PUMP_HOME = self.color_from_rgb(color_list[20])
-        self.COLOR_PAC_ON_OFF = self.color_from_rgb(color_list[21])
-        self.COLOR_BOILER_ON_OFF = self.color_from_rgb(color_list[22])
+#         color_list = [(199, 77, 127),(106, 150, 193),(32, 110, 224),(199, 84, 29),(190, 118, 112),(207, 15, 110),
+#                       (19, 36, 161),(199, 155, 117),(210, 165, 0),(38, 103, 191),(162, 41, 10),(124, 165, 155),
+#                       (0, 136, 124),(242, 18, 44),(239, 2, 193),(251, 143, 136),(196, 42, 237),(174, 175, 150),
+#                       (63, 54, 80),(191, 170, 138),(168, 186, 213),(255, 0, 0),(172, 159, 120),(242, 44, 141),
+#                       (158, 29, 64),(157, 196, 40),(162, 202, 79),(241, 193, 254),(75, 107, 176),(44, 122, 217)]
+# 
+#         # afficheurs
+#         self.COLOR_SALON = self.color_from_rgb(color_list[0])
+#         self.COLOR_BUREAU = self.color_from_rgb(color_list[1])
+#         self.COLOR_EXT = self.color_from_rgb(color_list[2])
+#         self.COLOR_PAC_VAL = self.color_from_rgb(color_list[3])
+#         # pac
+#         self.COLOR_FROM_PAC = self.color_from_rgb(color_list[4])
+#         self.COLOR_TO_PAC = self.color_from_rgb(color_list[5])
+#         self.COLOR_FROM_ACCU = self.color_from_rgb(color_list[6])
+#         self.COLOR_ON_BYPASS = self.color_from_rgb(color_list[7])
+#         self.COLOR_FT_PAC = self.color_from_rgb(color_list[8])
+#         # home
+#         self.COLOR_TO_HOME = self.color_from_rgb(color_list[9])
+#         self.COLOR_FROM_REZ = self.color_from_rgb(color_list[10])
+#         self.COLOR_FROM_1ER = self.color_from_rgb(color_list[11])
+#         self.COLOR_FROM_HOME = self.color_from_rgb(color_list[12])
+#         self.COLOR_FROM_BYPASS = self.color_from_rgb(color_list[13])
+#         self.COLOR_FT_HOME = self.color_from_rgb(color_list[14])
+#         # boiler
+#         self.COLOR_TO_BOILER = self.color_from_rgb(color_list[15])
+#         self.COLOR_IN_BOILER = self.color_from_rgb(color_list[16])
+#         self.COLOR_FROM_BOILER = self.color_from_rgb(color_list[17])
+#         self.COLOR_FT_BOILER = self.color_from_rgb(color_list[18])
+#         # states
+#         self.COLOR_PUMP_BOILER = self.color_from_rgb(color_list[19])
+#         self.COLOR_PUMP_HOME = self.color_from_rgb(color_list[20])
+#         self.COLOR_PAC_ON_OFF = self.color_from_rgb(color_list[21])
+#         self.COLOR_BOILER_ON_OFF = self.color_from_rgb(color_list[22])
 
         # afficheurs
         self.COLOR_SALON = self.color_from_rgb((199, 77, 127))
@@ -288,7 +315,7 @@ class Main:
         self.COLOR_PUMP_BOILER = self.color_from_rgb((35, 221, 253))#191, 170, 138))
         self.COLOR_PUMP_HOME = self.color_from_rgb((158, 153, 182))#168, 186, 213))
         self.COLOR_PAC_ON_OFF = self.color_from_rgb((255, 0, 0))
-        self.COLOR_BOILER_ON_OFF = self.color_from_rgb((172, 159, 120))
+        self.COLOR_BOILER_ON_OFF = self.color_from_rgb((3, 55, 246))
         
         self.GRID_COLOR = "silver"
         self.RECTANGLE_COLOR = "purple"
@@ -510,7 +537,7 @@ class Main:
         # states
         curvesmenu.add_checkbutton(label="Pump boiler", font = self.FONT_LABEL, variable = self.display_trace_pump_boiler, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="Pump home", font = self.FONT_LABEL, variable = self.display_trace_pump_home, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
+        curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
         curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
         curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
         curvesmenu.add_separator()
@@ -529,14 +556,6 @@ class Main:
         self.mesuremenu.add_command(label="No Zoom", font = self.FONT_LABEL, command=self.supress_all_zooms)
         self.mesuremenu.add_command(label="No cursors", font = self.FONT_LABEL, command=self.remove_cursors)
         menubar.add_cascade(label="Mesures", font = self.FONT_LABEL, menu=self.mesuremenu)
-        
-        # menu zooms
-#         self.zoommenu = Menu(menubar, tearoff=0)
-#         self.zoommenu.add_command(label="Zoom x", font = self.FONT_LABEL, command=self.set_x_scale_change)
-#         self.zoommenu.add_command(label="Zoom y", font = self.FONT_LABEL, command=self.set_y_scale_change)
-#         self.zoommenu.add_separator()
-#         self.zoommenu.add_command(label="Supress all zooms", font = self.FONT_LABEL, command=self.supress_all_zooms)
-#         menubar.add_cascade(label="Zooms", font = self.FONT_LABEL, menu=self.zoommenu)
         
         # menu database
         databasemenu = Menu(menubar, tearoff=0)
@@ -591,15 +610,14 @@ class Main:
         self.data_from_db = list(self.data_from_db)
         
         # initialize the last id in the graph_data
-        self.id_first_displayed_record = self.data_from_db[0][19]
-        self.id_last_displayed_record = self.data_from_db[-1][19]
+        self.id_first_displayed_record = self.data_from_db[0][20]
+        self.id_last_displayed_record = self.data_from_db[-1][20]
         
-        self.id_first_fromdb_record = self.data_from_db[0][19]
-        self.id_last_fromdb_record = self.data_from_db[-1][19]
+        self.id_first_fromdb_record = self.data_from_db[0][20]
+        self.id_last_fromdb_record = self.data_from_db[-1][20]
         
         self.nbre_records_in_data_from_db = len(self.data_from_db)
         
-#         pdb.set_trace()
         self.refresh_display()
         
 
@@ -607,7 +625,6 @@ class Main:
     def refresh_display(self):
         
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
-#         row = self.mysql_logger.get_last_mesured_temperature()
         
         # affichage des passes
         self.n_passe += 1
@@ -636,26 +653,25 @@ class Main:
             # 14      t14         exterieur
             # 15      s10         pump boiler
             # 16      s11         pump home
-            # 17      s20         pac on-pff
-            # 18      time_stamp
-            # 19      id
+            # 17      s20         pac on-off
+            # 18      s21         boiler on-off
+            # 19      time_stamp
+            # 20      id
             # ------------------------------------------------------------
         
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
-        print("self.id_first_displayed_record:",self.id_first_displayed_record, "self.id_last_displayed_record:",self.id_last_displayed_record)
         for row in self.data_from_db:
             # ajouter à data_for_graph
-            if row[19] >= self.id_first_displayed_record and row[19] <= self.id_last_displayed_record:
+#             pdb.set_trace()
+            
+            if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
-                                       row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19]])
+                                       row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
         i_last = len(self.data_for_graph) - 1
-        print("len(self.data_for_graph):", len(self.data_for_graph))
-
-        # index du dernier enregistrement
-#         self.index_of_last_data_for_graph_record = len(self.data_for_graph)-1
-#         self.id_last_fromdb_record = self.data_for_graph[self.index_of_last_data_for_graph_record][19]
-#         self.id_last_fromdb_record = self.id_last_fromdb_record
+        print("id_first_displayed_record:",self.id_first_displayed_record,
+              "id_last_displayed_record:",self.id_last_displayed_record,
+              "len(data_for_graph):", len(self.data_for_graph))
         
         # Calcul % PAC ON
         count_on = 0
@@ -669,7 +685,6 @@ class Main:
         else:
             self.pac_on_off = 0
             
-#         pdb.set_trace()
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
         self.t_salon = float(self.data_for_graph[i_last][12])
@@ -690,7 +705,7 @@ class Main:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph)
 
         # initialize date and time
-        datetime_start_plot = self.data_for_graph[0][18]
+        datetime_start_plot = self.data_for_graph[0][19]
         datetime_start_plot_str = "".join([str(datetime_start_plot.year),"-",str(datetime_start_plot.month),"-", str(datetime_start_plot.day)," ",
                              str(datetime_start_plot.hour),":",str(datetime_start_plot.minute),":",str(datetime_start_plot.second)]) 
         datetime_obj_start_plot = datetime.strptime(datetime_start_plot_str, '%Y-%m-%d %H:%M:%S')
@@ -719,8 +734,6 @@ class Main:
         self.cnv.bind("<ButtonPress-2>", self.on_mouse_manage)
         # mouvement de la souris pour afficher les valeurs sur le curseur de la souris
         self.cnv.bind("<Motion>", self.on_mouse_move)
-            
-#         pdb.set_trace()
         
         # create the y axis
         self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MIN, self.Y_MAX - self.V_PADX / 2, arrow = tk.LAST) 
@@ -733,13 +746,17 @@ class Main:
         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
             
             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 0.25  + self.Y_MIN 
-            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
+            self.cnv.create_text(self.X_MIN - self.X_MIN * 0.25, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
             
-            y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 1 + self.Y_MIN 
-            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_BOILER, text = "Boiler")
+#             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 0.25  + self.Y_MIN 
+            self.cnv.create_text(self.X_MIN - self.X_MIN * 0.75, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_BOILER_ON_OFF, text = "Boiler")
             
+#             y_sur_axe =  y_val_to_pix * self.graduation_step / 4 * 1 + self.Y_MIN 
             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 1.75  + self.Y_MIN 
-            self.cnv.create_text(self.X_MIN - self.X_MIN / 2, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_HOME, text = "Home")
+            self.cnv.create_text(self.X_MIN - self.X_MIN * 0.75, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_BOILER, text = "Boiler")
+            
+#             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 1.75  + self.Y_MIN 
+            self.cnv.create_text(self.X_MIN - self.X_MIN * 0.25, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_HOME, text = "Home")
             
             min_y_label = self.graduation_step
         else:
@@ -786,8 +803,8 @@ class Main:
 
         # find the x scale min and max for the graph
         no_last_record = len(self.data_for_graph) - 1
-        date_start = self.data_for_graph[0][18]
-        date_end = self.data_for_graph[no_last_record][18]
+        date_start = self.data_for_graph[0][19]
+        date_end = self.data_for_graph[no_last_record][19]
         self.echelle_x_min = date_start.timestamp()
         self.echelle_x_max = date_end.timestamp()
         
@@ -926,32 +943,17 @@ class Main:
                     s_pump_home = mes[16]
                     y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
                     self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
-                    
-#                 # pumps
-#                 if self.display_trace_pump_boiler.get() and mes[15] != -1:
-#                     s_pump_boiler = mes[15]
-#                     y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-#                     self.cnv.create_line(old_x, old_y_pump_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PUMP_BOILER)
-#                     old_y_pump_boiler = y
-#                      
-#                 if self.display_trace_pump_home.get() and mes[16] != -1:
-#                     s_pump_home = mes[16]
-#                     y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-#                     self.cnv.create_line(old_x, old_y_pump_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_PUMP_HOME)
-#                     old_y_pump_home = y
-                     
-#                 if self.display_trace_pac_on.get() and mes[17] != -1:
-#                     s_pac_onoff = mes[17]
-#                     y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
-#                     self.cnv.create_line(old_x, old_y_pac_onoff, x, y , width=self.TRACE_WIDTH, fill=self.COLOR_PAC_ON_OFF)
-#                     old_y_pac_onoff = y
                      
                 self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
                 if self.display_trace_pac_on.get() and mes[17] != -1:
                     s_pac_onoff = mes[17]
-                    y = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
                     if s_pac_onoff == 1:
-                        self.cnv.create_line(old_x, self.Y_MIN+2.5, x, self.Y_MIN+2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
+                        self.cnv.create_line(old_x, self.Y_MIN + 2.5, x, self.Y_MIN + 2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
+                     
+                if self.display_trace_boiler_on.get() and mes[17] != -1:
+                    s_boiler_onoff = mes[18]
+                    if s_boiler_onoff == 1:
+                        self.cnv.create_line(old_x, self.Y_MIN + 8, x, self.Y_MIN + 8 , width=5, fill=self.COLOR_BOILER_ON_OFF)
                 
                 old_x = x
 
@@ -1063,33 +1065,26 @@ class Main:
             # read the new(s) record(s) in the database
             self.read_data = self.mysql_logger.get_temp_to_complete_graph(self.id_last_fromdb_record) # id's bigger than self.id_last_fromdb_record
             n_row = len(self.read_data)
-            print(self.id_last_fromdb_record, n_row)
             n_removed = 0
 
             p_str = "".join(["passe:", str(self.n_passe)])
             p_str += "".join([" n_row:", str(n_row), " removed:"])
 
-            print("len(data_from_db begin):", len(self.data_from_db))
             # remove the old(s) record(s) in the data_from_db list
             while n_removed < n_row:
                 record_to_remove = self.data_from_db[0]
                 self.data_from_db.remove(record_to_remove)
                 n_removed += 1
                 p_str += "".join([str(record_to_remove[0]), "/"])
-            print("len(data_from_db after remove):", len(self.data_from_db))
                 
             # and add the now(s) record(s) in the data_from_db list
             p_str += " added:"
             for row in self.read_data:
                 self.data_from_db.append(row)
                 p_str += "".join([str(row[0]), "/"])
-            print("len(data_from_db after add):", len(self.data_from_db), "\n")
             
             # adapt the id of the last records
-            self.id_last_fromdb_record = self.data_from_db[-1][19]
-            
-#             self.id_first_displayed_record += n_removed
-#             self.id_last_displayed_record += n_removed
+            self.id_last_fromdb_record = self.data_from_db[-1][20]
             self.id_last_displayed_record = self.id_last_fromdb_record
             
             p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
@@ -1108,12 +1103,10 @@ class Main:
 
             for mouse_pos_cursor_x in tmp_mouse_pos_cursors_x:
                 new_x = mouse_pos_cursor_x - pixels_shift_left
-#                 self.mouse_cursors_x.append(self.cnv.create_line(new_x, self.Y_MIN, new_x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
                 self.mouse_pos_cursors_x.append(new_x)
                 
             self.mouse_cursors_y.clear()
             for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
-#                 self.mouse_cursors_x.append(self.cnv.create_line(new_x, self.Y_MIN, new_x, self.Y_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
                 self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
         # pause the program for a while (t_pause) and after that restat it
@@ -1179,11 +1172,11 @@ class Main:
                 max_found = False
                 for i, row in enumerate(self.data_from_db):
                     
-                    if row[18] >= time_begin_mesure and not min_found:
+                    if row[19] >= time_begin_mesure and not min_found:
                         self.id_first_displayed_record = i
                         min_found = True
                         
-                    if row[18] >= time_end_mesure and not max_found:
+                    if row[19] >= time_end_mesure and not max_found:
                         self.id_last_displayed_record  = i
                         max_found = True
                 # set the zoom indicator
@@ -1481,12 +1474,12 @@ class Main:
             max_found = False
             for row in self.data_from_db:
                 
-                if row[18] >= x_min_date and not min_found:
-                    self.id_first_displayed_record = row[19]
+                if row[19] >= x_min_date and not min_found:
+                    self.id_first_displayed_record = row[20]
                     min_found = True
                     
-                if row[18] >= x_max_date and not max_found:
-                    self.id_last_displayed_record  = row[19]
+                if row[19] >= x_max_date and not max_found:
+                    self.id_last_displayed_record  = row[20]
                     max_found = True
             
             y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min

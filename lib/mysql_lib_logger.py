@@ -21,22 +21,32 @@ class Mysql:
         La base de données est sur le RPI 192.168.1.109 et est accessible en local ou par le réseau.
         L'accès à la base de données est vérifiée lors de l'_init et les défauts d'accès sont enregistrés.
         
-        [0] -> timeStamp
-        [1] -> id
-        [2] -> from PAC
-        [3] -> to PAC
-        [4] -> from accu
-        [5] -> to bypass
-        [6] -> to home
-        [7] -> from home
-        [8] -> from bypass
-        [9] -> to boiler
-        [10] -> from boiler
-        [11] -> salon
-        [12] -> bureau
-        [13] -> ext
-        [14] -> from floor
-        [15] -> from first
+        ------------------------------------------------------------
+        index dans data_from_db et data_for_graph et noms des champs
+        ------------------------------------------------------------
+        index   db name     designation
+        0       t0          from pac
+        1       t1          to pac
+        2       t2          from accu
+        3       t3          on bypass
+        4       t4          to home
+        5       t5          from home rez
+        6       t6          from home 1er
+        7       t7          from home
+        8       t8          from bypass
+        9       t9          to boiler
+        10      t10         in boiler
+        11      t11         from boiler
+        12      t12         salon
+        13      t13         bureau
+        14      t14         exterieur
+        15      s10         pump boiler
+        16      s11         pump home
+        17      s20         pac on-off
+        18      s21         boiler on-off
+        19      time_stamp
+        20      id
+        ------------------------------------------------------------
         
         Procédures :
         _init ()
@@ -153,7 +163,7 @@ class Mysql:
             exit()
             
         cur = con.cursor()
-        sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, time_stamp, id ",
+        sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, s21, time_stamp, id ",
                            "FROM tlog WHERE time_stamp BETWEEN '", str(time_begin_mesure), "' AND '", str(time_end_mesure), "';"])
         cur.execute(sql_txt)
         row = cur.fetchall()
@@ -183,7 +193,7 @@ class Mysql:
 
         cur = con.cursor()
 #         sql_txt = "".join(["SELECT timeStamp, id, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14 FROM tLog WHERE id > '", str(last_id), "';"])
-        sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, time_stamp, id ",
+        sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, s21, time_stamp, id ",
                            "FROM tlog WHERE id > '", str(last_id), "';"])
 #         print(sql_txt)
         
