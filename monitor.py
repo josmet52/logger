@@ -53,10 +53,10 @@ class Main:
 
         # version infos
         self.VERSION_NAME = "Monitor" 
-        self.VERSION_NO = "0.02.01" 
-        self.VERSION_DATE = "29.04.2020"
-        self.VERSION_DESCRIPTION = "development progress: still small bugs"
-        self.VERSION_STATUS = "prototype"
+        self.VERSION_NO = "1.00.00" 
+        self.VERSION_DATE = "02.05.2020"
+        self.VERSION_DESCRIPTION = "all features are implemented"
+        self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
         # variables de controle
@@ -92,7 +92,6 @@ class Main:
         
         self.ip_db_server = "192.168.1.139"
         self.mysql_logger = Mysql(self.ip_db_server)
-#         self.local_ip = self.mysql_logger.local_ip
 
         # initialisations
         self.NBRE_DAYS_ON_GRAPH = 6/24
@@ -251,42 +250,6 @@ class Main:
         self.FONT_TEXT_MEDIUM = "".join(["Helvetica ",str(int(12*self.win_width/self.max_width))])
         self.FONT_TEXT_SMALL = "".join(["Helvetica ",str(int(10*self.win_width/self.max_width))])
         self.FONT_TEMP = "".join(["Helvetica ",str(int(70*self.win_width/self.max_width))])
-
-        # couleurs
-#         color_list = [(199, 77, 127),(106, 150, 193),(32, 110, 224),(199, 84, 29),(190, 118, 112),(207, 15, 110),
-#                       (19, 36, 161),(199, 155, 117),(210, 165, 0),(38, 103, 191),(162, 41, 10),(124, 165, 155),
-#                       (0, 136, 124),(242, 18, 44),(239, 2, 193),(251, 143, 136),(196, 42, 237),(174, 175, 150),
-#                       (63, 54, 80),(191, 170, 138),(168, 186, 213),(255, 0, 0),(172, 159, 120),(242, 44, 141),
-#                       (158, 29, 64),(157, 196, 40),(162, 202, 79),(241, 193, 254),(75, 107, 176),(44, 122, 217)]
-# 
-#         # afficheurs
-#         self.COLOR_SALON = self.color_from_rgb(color_list[0])
-#         self.COLOR_BUREAU = self.color_from_rgb(color_list[1])
-#         self.COLOR_EXT = self.color_from_rgb(color_list[2])
-#         self.COLOR_PAC_VAL = self.color_from_rgb(color_list[3])
-#         # pac
-#         self.COLOR_FROM_PAC = self.color_from_rgb(color_list[4])
-#         self.COLOR_TO_PAC = self.color_from_rgb(color_list[5])
-#         self.COLOR_FROM_ACCU = self.color_from_rgb(color_list[6])
-#         self.COLOR_ON_BYPASS = self.color_from_rgb(color_list[7])
-#         self.COLOR_FT_PAC = self.color_from_rgb(color_list[8])
-#         # home
-#         self.COLOR_TO_HOME = self.color_from_rgb(color_list[9])
-#         self.COLOR_FROM_REZ = self.color_from_rgb(color_list[10])
-#         self.COLOR_FROM_1ER = self.color_from_rgb(color_list[11])
-#         self.COLOR_FROM_HOME = self.color_from_rgb(color_list[12])
-#         self.COLOR_FROM_BYPASS = self.color_from_rgb(color_list[13])
-#         self.COLOR_FT_HOME = self.color_from_rgb(color_list[14])
-#         # boiler
-#         self.COLOR_TO_BOILER = self.color_from_rgb(color_list[15])
-#         self.COLOR_IN_BOILER = self.color_from_rgb(color_list[16])
-#         self.COLOR_FROM_BOILER = self.color_from_rgb(color_list[17])
-#         self.COLOR_FT_BOILER = self.color_from_rgb(color_list[18])
-#         # states
-#         self.COLOR_PUMP_BOILER = self.color_from_rgb(color_list[19])
-#         self.COLOR_PUMP_HOME = self.color_from_rgb(color_list[20])
-#         self.COLOR_PAC_ON_OFF = self.color_from_rgb(color_list[21])
-#         self.COLOR_BOILER_ON_OFF = self.color_from_rgb(color_list[22])
 
         # afficheurs
         self.COLOR_SALON = self.color_from_rgb((199, 77, 127))
@@ -602,6 +565,11 @@ class Main:
         # interrompre les répétitions        
         self.kill_repetition_job()
         
+        # efface le graphique et affiche working pendant le travail
+        self.cnv.delete("all")
+        self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... loading data ...")
+        self.cnv.update()
+        
         self.NBRE_DAYS_ON_GRAPH = nbre_days
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
@@ -631,47 +599,18 @@ class Main:
         self.tk_root.title("".join(["Monitor passe ", str(self.n_passe)])) #, " t=", "{0:.2f}".format(self.t_elapsed.total_seconds()), "[s])"])) 
         
         # initialisation des variables internes
-            
-            # ------------------------------------------------------------
-            # index dans data_from_db et data_for_graph et noms des champs
-            # ------------------------------------------------------------
-            # index   db name     designation
-            # 0       t0          from pac
-            # 1       t1          to pac
-            # 2       t2          from accu
-            # 3       t3          on bypass
-            # 4       t4          to home
-            # 5       t5          from home rez
-            # 6       t6          from home 1er
-            # 7       t7          from home
-            # 8       t8          from bypass
-            # 9       t9          to boiler
-            # 10      t10         in boiler
-            # 11      t11         from boiler
-            # 12      t12         salon
-            # 13      t13         bureau
-            # 14      t14         exterieur
-            # 15      s10         pump boiler
-            # 16      s11         pump home
-            # 17      s20         pac on-off
-            # 18      s21         boiler on-off
-            # 19      time_stamp
-            # 20      id
-            # ------------------------------------------------------------
-        
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
         for row in self.data_from_db:
             # ajouter à data_for_graph
-#             pdb.set_trace()
             
             if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
         i_last = len(self.data_for_graph) - 1
-        print("id_first_displayed_record:",self.id_first_displayed_record,
-              "id_last_displayed_record:",self.id_last_displayed_record,
-              "len(data_for_graph):", len(self.data_for_graph))
+#         print("id_first_displayed_record:",self.id_first_displayed_record,
+#               "id_last_displayed_record:",self.id_last_displayed_record,
+#               "len(data_for_graph):", len(self.data_for_graph))
         
         # Calcul % PAC ON
         count_on = 0
@@ -747,15 +686,10 @@ class Main:
             
             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 0.25  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN * 0.25, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
-            
-#             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 0.25  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN * 0.75, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_BOILER_ON_OFF, text = "Boiler")
             
-#             y_sur_axe =  y_val_to_pix * self.graduation_step / 4 * 1 + self.Y_MIN 
             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 1.75  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN * 0.75, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_BOILER, text = "Boiler")
-            
-#             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 1.75  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN * 0.25, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PUMP_HOME, text = "Home")
             
             min_y_label = self.graduation_step
@@ -863,7 +797,6 @@ class Main:
                     old_y_pac_ft = y
                     
                 # Home
-                    
                 if self.display_trace_on_bypass.get() and mes[3] != -333:
                     t_on_bypass = mes[3]
                     y = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
@@ -943,8 +876,10 @@ class Main:
                     s_pump_home = mes[16]
                     y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
                     self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
-                     
+                
+                # redraw x-axis
                 self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
+                # states     
                 if self.display_trace_pac_on.get() and mes[17] != -1:
                     s_pac_onoff = mes[17]
                     if s_pac_onoff == 1:
@@ -1045,10 +980,6 @@ class Main:
                 if self.display_trace_pump_home.get() and mes[16] != -1:
                     s_pump_home = mes[16]
                     old_y_pump_home = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-                   
-                if self.display_trace_pac_on.get():
-                    s_pac_onoff = mes[17]
-                    old_y_pac_onoff = self.Y_MIN + self.graduation_step * y_val_to_pix * s_pac_onoff
                     
                 old_x = old_x
             
@@ -1140,9 +1071,8 @@ class Main:
         tk.Button(ask_window, text='OK', default = "active",  command = lambda: self.apply_x_scale_change("ok", ask_window, \
                                              get_x_min.get(), get_x_max.get())).grid(row = 3, column = 0, columnspan = 2, sticky = tk.E)
 
-        # show the window
+        # show the window and start event trapper
         ask_window.focus_set()
-        # trap events
         ask_window.mainloop()
 
     # apply the x zoom
@@ -1240,23 +1170,17 @@ class Main:
         
         # efface le graphique et affiche working pendant le travail
         self.cnv.delete("all")
-        self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... working ...")
+        self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... loading data ...")
         self.cnv.update()
         
         # mettre à jour l'affichage
         self.refresh_display()
-
 
     # fonction appelée par le menu 'timemenu'
     def change_days_on_display(self, nbre_days):
         
         # tuer la tache en cours
         self.kill_repetition_job()
-        
-        # efface le graphique et affiche working pendant le travail
-        self.cnv.delete("all")
-        self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... working ...")
-        self.cnv.update()
         
         # vider la mémoire des curseurs x
         self.mouse_pos_cursors_x.clear()
@@ -1375,7 +1299,6 @@ class Main:
                 self.echelle_y_max = get_y_max
                 self.graduation_step = get_graduation_step
                 self.zoom_active = True
-#                 menu_state = tk.DISABLED
                 self.refresh_display()
             
         elif v_choice == "default":
@@ -1395,7 +1318,6 @@ class Main:
 
         # LEFT MOUSE BUTTON
         # left mouse button in the graph area --> rectangle pour zoom
-#         print(event.type, event.num, event.state)
         if str(event.type) == "ButtonPress" and event.num == 1 and event.x >= self.X_MIN and event.x <= self.X_MAX:
             
             self.mouse_x = event.x
@@ -1409,22 +1331,16 @@ class Main:
         elif str(event.type) == "ButtonPress" and event.num == 1 and (event.x < self.X_MIN or event.x > self.X_MAX):
             
             if self.mouse_scroll_left and (self.id_first_displayed_record > self.id_first_fromdb_record ):
-#                 pdb.set_trace()
                 self.id_first_displayed_record -= 1
                 self.id_last_displayed_record -= 1
                 self.refresh_display()
                 self.cnv.configure(cursor = "sb_left_arrow")
 
-#                 print(self.id_first_displayed_record, self.id_first_fromdb_record)
-                
             if self.mouse_scroll_right and (self.id_last_displayed_record < self.id_last_fromdb_record):
-#                 pdb.set_trace()
                 self.id_first_displayed_record += 1
                 self.id_last_displayed_record += 1
                 self.refresh_display()
                 self.cnv.configure(cursor = "sb_right_arrow")
-
-#                 print(self.id_last_displayed_record, self.id_last_fromdb_record)
             
         # mouse move while left button pressed in the graph --> cursor
         if str(event.type) == "Motion"  and event.state == 272 and event.x >= self.X_MIN and event.x <= self.X_MAX: # state 272 = left button
@@ -1468,7 +1384,6 @@ class Main:
             x_max_date = datetime.strptime(x_max_date, '%Y-%m-%d %H:%M:%S')
 
             self.nbre_hours_on_graph = abs(x_max_date - x_min_date).seconds / 3600
-
             
             min_found = False
             max_found = False
@@ -1498,7 +1413,6 @@ class Main:
         # right mouse button
         if str(event.type) == "ButtonPress" and event.num == 3 and event.y >= self.Y_MIN and event.y <= self.Y_MAX:
             self.mouse_y = event.y
-#             self.mouse_events_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
             self.mouse_events_x.append(self.cnv.create_line(event.x, self.X_MIN, event.x, self.X_MAX, fill=self.CURSOR_X_COLOR, dash=(2, 4), width = 2))
 
         # mouse move while right button pressed
@@ -1508,8 +1422,6 @@ class Main:
                 
                 for mouse_event in self.mouse_events_y:
                     self.cnv.delete(mouse_event)
-                    
-#                 self.mouse_events_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
                 for mouse_event in self.mouse_events_x:
                     self.cnv.delete(mouse_event)
@@ -1524,9 +1436,6 @@ class Main:
             for mouse_event in self.mouse_events_y:
                 self.cnv.delete(mouse_event)
             self.mouse_events_y.clear()
-                
-#             self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, event.y, self.X_MAX, event.y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))    
-#             self.mouse_pos_cursors_y.append(event.y)
 
             for mouse_event in self.mouse_events_x:
                 self.cnv.delete(mouse_event)
@@ -1546,7 +1455,6 @@ class Main:
         
         if abs(event.x - self.mouse_x) > 2:
             self.get_mouse_cursor_label(event)
-#         pdb.set_trace()
         if event.x < self.X_MIN and (self.id_first_displayed_record > self.id_first_fromdb_record):
             self.cnv.configure(cursor = "sb_left_arrow")
             self.mouse_scroll_left = True
@@ -1712,7 +1620,6 @@ class Main:
         else:
             y_min_ret = (y_min // graduation_step) * graduation_step  
             y_max_ret = (y_max // graduation_step) * graduation_step
-#         pdb.set_trace()
             
         if y_max > 0:
             y_max_ret += graduation_step
