@@ -107,16 +107,12 @@ if __name__ == '__main__':
         print("error: no DS2413 found")
         sys.exit(0)
         
-    while True:
-        ds2413.pass_counter += 1
-        print("passe: ", str(ds2413.pass_counter))
-        for i in range(ds2413._num_devices):
-            PIOA, PIOB, sensor, status = ds2413.read_ds2413(i)
-            if status == 'ok':
-                print("".join([sensor, " PIOA=", str(PIOA), " PIOB=", str(PIOB), " ", status]))
-            else:
-                print("".join([datetime.datetime.now().strftime("%Y.%m.%d, %H:%M:%S"), "\n", sensor, " -> ", status]))
-        time.sleep(2)
-        print()
+    ds2413.pass_counter += 1
+    for i in range(ds2413._num_devices):
+        PIOA, PIOB, sensor, status = ds2413.read_ds2413(i)
+        if status == 'ok':
+            print("".join([sensor, " PIOA=", str(PIOA), " PIOB=", str(PIOB), " ", status]))
+        else:
+            print("".join([datetime.datetime.now().strftime("%Y.%m.%d, %H:%M:%S"), "\n", sensor, " -> ", status]))
 
 
