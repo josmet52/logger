@@ -94,7 +94,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 6/24
+        self.NBRE_DAYS_ON_GRAPH = 7 # 6/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -556,7 +556,6 @@ class Main:
         self.val_pac.set("".join([str(int(self.pac_on_off)), " %"]))
 
         # read the database for data's for graph
-        print("Loading data's")
         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
 
     # read the new data's and reresh the display
@@ -568,14 +567,17 @@ class Main:
         # efface le graphique et affiche working pendant le travail
         self.cnv.delete("all")
         self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... loading data ...")
-        self.cnv.update()
+#         self.cnv.update()
+        self.cnv.update_idletasks()
         
         self.NBRE_DAYS_ON_GRAPH = nbre_days
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # read the database for data's for graph
+        t_start = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
         self.data_from_db = list(self.data_from_db)
+        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
         
         # initialize the last id in the graph_data
         self.id_first_displayed_record = self.data_from_db[0][20]
@@ -591,7 +593,6 @@ class Main:
 
     # Rafraichissement des valeurs toutes les minutes (l'intevalle peut être égal ou supérieur à celui entre deux acquisitions)
     def refresh_display(self):
-        
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
         
         # affichage des passes
@@ -601,9 +602,9 @@ class Main:
         # initialisation des variables internes
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
+        t_start = datetime.now()
         for row in self.data_from_db:
             # ajouter à data_for_graph
-            
             if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
@@ -623,6 +624,8 @@ class Main:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
+        print("data is ready", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
             
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
@@ -680,7 +683,9 @@ class Main:
 
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
-        
+        print("display is updated", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
+
         # PAC label only if PAC or boiler is displayed
         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
             
@@ -746,6 +751,10 @@ class Main:
         old_y_salon, old_y_bureau, old_y_ext, old_y_from_pac, old_y_to_pac, old_y_from_accu, old_y_to_home, old_y_to_boiler, old_y_home_ft, \
                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
+        
+        print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
+        self.cnv.update_idletasks()
         
         y = 0
         # draw the curves
@@ -988,7 +997,9 @@ class Main:
         secondes_decimales_float = float(secondes_decimales_str)/1E6
         t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
         t_pause = self.t_pause - t_elapsed
-                
+        print("curves are created", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
+        
         # read the database for data's to append to the graph
         # but stop the changes in the daabase while zoom is active
         if not self.zoom_active:
@@ -1043,6 +1054,7 @@ class Main:
         # pause the program for a while (t_pause) and after that restat it
 #         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
 #                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
+        print("waiting for next display update", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
         self._job = self.tk_root.after(t_pause, self.refresh_display)
 
     def set_x_scale_change(self):
