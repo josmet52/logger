@@ -94,7 +94,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 10#10/24
+        self.NBRE_DAYS_ON_GRAPH = 240/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -227,6 +227,12 @@ class Main:
         self.COLOR_BG_CANVAS = "gray90" # "azure"       
         self.CURSOR_X_COLOR = "red" # "gray25"
         self.CURSOR_Y_COLOR = "blue" # "gray50"
+        # states
+        self.COLOR_PUMP_BOILER = self.rgb_color((35, 221, 253))#191, 170, 138))
+        self.COLOR_PUMP_HOME = self.rgb_color((158, 153, 182))#168, 186, 213))
+        self.COLOR_PAC_ON_OFF = self.rgb_color((255, 0, 0))
+        self.COLOR_BOILER_ON_OFF = self.rgb_color((3, 55, 246))
+
 
         # variables pour le grid de tkinter
         self.n_col = 64
@@ -453,6 +459,7 @@ class Main:
             for record in range(len(self.data_from_db)):
                 colonne.append(self.data_from_db[record][sensor])
             self.data_for_graph_new.append(colonne)
+            
         # PAC ft
         tmp = []
         for ix in range(len(self.data_for_graph_new[0])):
@@ -461,6 +468,7 @@ class Main:
             else:
                 tmp.append(self.data_for_graph_new[0][ix] - self.data_for_graph_new[1][ix])
         self.data_for_graph_new.append(tmp)
+        
         # Home ft
         tmp = []
         for ix in range(len(self.data_for_graph_new[0])):
@@ -469,6 +477,7 @@ class Main:
             else:
                 tmp.append(self.data_for_graph_new[4][ix] - self.data_for_graph_new[7][ix])
         self.data_for_graph_new.append(tmp)
+        
         # Boiler ft
         tmp = []
         for ix in range(len(self.data_for_graph_new[0])):
@@ -477,6 +486,7 @@ class Main:
             else:
                 tmp.append(self.data_for_graph_new[11][ix] - self.data_for_graph_new[9][ix])
         self.data_for_graph_new.append(tmp)
+        
         # time and id
         for sensor in range(len(self.data_from_db[0])-2, len(self.data_from_db[0])):
             colonne = []
@@ -488,14 +498,14 @@ class Main:
         t_start = datetime.now()
         
         # initialize the last id in the graph_data
-        self.id_first_displayed_record = min(self.data_for_graph_new[20])
-        self.id_last_displayed_record = max(self.data_for_graph_new[20])
+        self.id_first_displayed_record = min(self.data_for_graph_new[23])
+        self.id_last_displayed_record = max(self.data_for_graph_new[23])
         
-        self.id_first_fromdb_record = min(self.data_for_graph_new[20])
-        self.id_last_fromdb_record = max(self.data_for_graph_new[20])
+        self.id_first_fromdb_record = min(self.data_for_graph_new[23])
+        self.id_last_fromdb_record = max(self.data_for_graph_new[23])
         
-        self.nbre_records_in_data_from_db = len(self.data_for_graph_new[20])
-
+        self.nbre_records_in_data_from_db = len(self.data_for_graph_new[23])
+        
         self.refresh_display()
         
 
@@ -508,7 +518,7 @@ class Main:
         self.tk_root.title("".join(["Monitor passe ", str(self.n_passe)])) #, " t=", "{0:.2f}".format(self.t_elapsed.total_seconds()), "[s])"])) 
         
         # initialisation des variables internes
-        self.data_for_graph = []
+#         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
         t_mes_start = datetime.now()
         
@@ -553,12 +563,9 @@ class Main:
         print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
         
         t_scale_start = datetime.now()
-##########################################
-#         pdb.set_trace()
-##########################################
 
         # initialize date and time
-        datetime_start_plot = self.data_for_graph[0][19]
+        datetime_start_plot = min(self.data_for_graph_new[22])
         datetime_start_plot_str = "".join([str(datetime_start_plot.year),"-",str(datetime_start_plot.month),"-", str(datetime_start_plot.day)," ",
                              str(datetime_start_plot.hour),":",str(datetime_start_plot.minute),":",str(datetime_start_plot.second)]) 
         datetime_obj_start_plot = datetime.strptime(datetime_start_plot_str, '%Y-%m-%d %H:%M:%S')
@@ -594,12 +601,12 @@ class Main:
 
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
-        
+
         print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
 
         # PAC label only if PAC or boiler is displayed
-        if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
+        if self.menu_list[15].get() or self.menu_list[16].get() or self.menu_list[17].get() or self.menu_list[18].get() :
             
             y_sur_axe =  y_val_to_pix * self.graduation_step / 3 * 0.25  + self.Y_MIN 
             self.cnv.create_text(self.X_MIN - self.X_MIN * 0.25, y_sur_axe, font = self.FONT_LABEL, fill=self.COLOR_PAC_ON_OFF, text = "PAC")
@@ -649,261 +656,277 @@ class Main:
             h_count += tic_space
 
         # draw the graph
-        n_mes = len(self.data_for_graph)
+        n_mes = len(self.data_for_graph_new[0])
         x_data_to_pix = (self.X_MAX - self.X_MIN) / n_mes
 
         # find the x scale min and max for the graph
-        no_last_record = len(self.data_for_graph) - 1
-        date_start = self.data_for_graph[0][19]
-        date_end = self.data_for_graph[no_last_record][19]
+        no_last_record = len(self.data_for_graph_new) - 1
+        date_start = min(self.data_for_graph_new[22])
+        date_end = max(self.data_for_graph_new[22])
         self.echelle_x_min = date_start.timestamp()
         self.echelle_x_max = date_end.timestamp()
         
         # initialize the old_values to 0
-        old_y_salon, old_y_bureau, old_y_ext, old_y_from_pac, old_y_to_pac, old_y_from_accu, old_y_to_home, old_y_to_boiler, old_y_home_ft, \
-                 old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
-        old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
-        
+#         old_y_salon, old_y_bureau, old_y_ext, old_y_from_pac, old_y_to_pac, old_y_from_accu, old_y_to_home, old_y_to_boiler, old_y_home_ft, \
+#                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
+#         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
+            
         print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
         
-        y = 0
-        # draw the curves
-        for i, mes in enumerate(self.data_for_graph):
-            # but not for the first pass because old value are not correct
-            if i > 0: 
-                x = i * x_data_to_pix + self.V_PADX
-#                 print(x, old_x, x-old_x)
-                if (x - old_x) > 3:
-                   
-                    # afficheurs
-                    if self.display_trace_salon.get() and mes[12] != -333:
-                        t_salon = mes[12]
-                        y = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_salon, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_SALON)
-                        old_y_salon = y
-                    if self.display_trace_bureau.get() and mes[13] != -333:
-                        t_bureau = mes[13]
-                        y = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_bureau, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_BUREAU)
-                        old_y_bureau = y
-                    if self.display_trace_ext.get() and mes[14] != -333:
-                        t_ext = mes[14]
-                        y = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_ext, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_EXT)
-                        old_y_ext = y
+        x_dat = []
+        for i in range(len(self.data_for_graph_new[0])):
+            x_dat.append(i * x_data_to_pix + self.V_PADX)
+#             print(i, i * x_data_to_pix + self.V_PADX)
+        t_mes_start = datetime.now()
 
-                    # PAC
-                    if self.display_trace_from_pac.get() and mes[0] != -333:
-                        t_from_pac = mes[0]
-                        y = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_PAC)
-                        old_y_from_pac = y
-                        
-                    if self.display_trace_to_pac.get() and mes[1] != -333:
-                        t_to_pac = mes[1]
-                        y = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_to_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_PAC)
-                        old_y_to_pac = y
-             
-                    if self.display_trace_from_accu.get() and mes[2] != -333:
-                        t_from_accu = mes[2]
-                        y = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_accu, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_ACCU)
-                        old_y_from_accu = y
-                        
-                    if self.display_trace_pac_ft.get() and mes[0] != -333 and mes[1] != -333:
-                        t_pac_ft = mes[0] - mes[1]
-                        y = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_pac_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
-                        old_y_pac_ft = y
-                        
-                    # Home
-                    if self.display_trace_on_bypass.get() and mes[3] != -333:
-                        t_on_bypass = mes[3]
-                        y = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_on_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
-                        old_y_on_bypass = y
-                        
-                    if self.display_trace_to_home.get() and mes[4] != -333:
-                        t_to_home = mes[4]
-                        y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_to_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_HOME)
-                        old_y_to_home = y
-                        
-                    if self.display_trace_from_home_rez.get() and mes[5] != -333:
-                        t_from_home_rez = mes[5]
-                        y = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_home_rez, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_REZ)
-                        old_y_from_home_rez = y
-                        
-                    if self.display_trace_from_home_1er.get() and mes[6] != -333:
-                        t_from_home_1er = mes[6]
-                        y = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_home_1er, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_1ER)
-                        old_y_from_home_1er = y
-                        
-                    if self.display_trace_from_home.get() and mes[7] != -333:
-                        t_from_home = mes[7]
-                        y = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_HOME)
-                        old_y_from_home = y
-                        
-                    if self.display_trace_from_bypass.get() and mes[8] != -333:
-                        t_from_bypass = mes[8]
-                        y = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BYPASS)
-                        old_y_from_bypass = y
-                        
-                    if self.display_trace_home_ft.get() and mes[4] != -333 and mes[7] != -333:
-                        t_to_home = mes[4] - mes[7]
-                        y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_home_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_HOME)
-                        old_y_home_ft = y
-
-                    # Boiler
-                    if self.display_trace_to_boiler.get() and mes[9] != -333:
-                        t_to_boiler = mes[9]
-                        y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_to_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_BOILER)
-                        old_y_to_boiler = y
-                        
-                    if self.display_trace_in_boiler.get() and mes[10] != -333:
-                        t_in_boiler = mes[10]
-                        y = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_in_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_IN_BOILER)
-                        old_y_in_boiler = y
-                        
-                    if self.display_trace_from_boiler.get() and mes[11] != -333:
-                        t_from_boiler = mes[11]
-                        y = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_from_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BOILER)
-                        old_y_from_boiler = y
-                        
-                    if self.display_trace_boiler_ft.get() and mes[9] != -333 and mes[11] != -333:
-                        t_to_boiler = mes[11] - mes[9]
-                        y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-                        self.cnv.create_line(old_x, old_y_boiler_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_BOILER)
-                        old_y_boiler_ft = y
-                        
-                    # pumps
-                    # épaisseur du trait = pixels / minutes et un peu plus
-                    pump_line_width = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
-                    if self.display_trace_pump_boiler.get() and mes[15] != -1:
-                        s_pump_boiler = mes[15]
-                        y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-                        self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_BOILER)
-                         
-                    if self.display_trace_pump_home.get() and mes[16] != -1:
-                        s_pump_home = mes[16]
-                        y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-                        self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
-                    
-                    # redraw x-axis
-                    self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
-                    # states     
-                    if self.display_trace_pac_on.get() and mes[17] != -1:
-                        s_pac_onoff = mes[17]
-                        if s_pac_onoff == 1:
-                            self.cnv.create_line(old_x, self.Y_MIN + 2.5, x, self.Y_MIN + 2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
-                         
-                    if self.display_trace_boiler_on.get() and mes[17] != -1:
-                        s_boiler_onoff = mes[18]
-                        if s_boiler_onoff == 1:
-                            self.cnv.create_line(old_x, self.Y_MIN + 8, x, self.Y_MIN + 8 , width=5, fill=self.COLOR_BOILER_ON_OFF)
-                    
-                    old_x = x
-
-            else: # this is the first pass also initialize the old values
-                
-                old_x = i * x_data_to_pix + self.V_PADX
-                
-                # afficheurs
-                if self.display_trace_salon.get():
-                    t_salon = mes[12]
-                    old_y_salon = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
-                
-                if self.display_trace_bureau.get():
-                    t_bureau = mes[13]
-                    old_y_bureau = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_ext.get():
-                    t_ext = mes[14]
-                    old_y_ext = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
-
-                # PAC
-                if self.display_trace_from_pac.get():
-                    t_from_pac = mes[0]
-                    old_y_from_pac = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_to_pac.get():
-                    t_to_pac = mes[1]
-                    old_y_to_pac = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
- 
-                if self.display_trace_from_accu.get():
-                    t_from_accu = mes[2]
-                    old_y_from_accu = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_pac_ft.get():
-                    t_pac_ft = mes[0] - mes[1]
-                    old_y_pac_ft = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
-         
-                # home
-                if self.display_trace_on_bypass.get():
-                    t_on_bypass = mes[3]
-                    old_y_on_bypass = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
-                    
-                if self.display_trace_to_home.get():
-                    t_to_home = mes[4]
-                    old_y_to_home = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-                    
-                if self.display_trace_from_home_rez.get():
-                    t_from_home_rez = mes[5]
-                    old_y_from_home_rez = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
-                    
-                if self.display_trace_from_home_1er.get():
-                    t_from_home_1er = mes[6]
-                    old_y_from_home_1er = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
-                    
-                if self.display_trace_from_home.get():
-                    t_from_home = mes[7]
-                    old_y_from_home = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
-                    
-                if self.display_trace_from_bypass.get():
-                    t_from_bypass = mes[8]
-                    old_y_from_bypass = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_home_ft.get():
-                    t_to_home = mes[4] - mes[7]
-                    old_y_home_ft = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-
-                # boiler
-                if self.display_trace_to_boiler.get():
-                    t_to_boiler = mes[9]
-                    old_y_to_boiler = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_in_boiler.get():
-                    t_in_boiler = mes[10]
-                    old_y_in_boiler = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_from_boiler.get():
-                    t_from_boiler = mes[11]
-                    old_y_from_boiler = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
-
-                if self.display_trace_boiler_ft.get():
-                    t_boiler_ft = mes[11] - mes[9]
-                    old_y_boiler_ft = y_val_to_pix * (t_boiler_ft - self.echelle_y_min) + self.Y_MIN
-                
-                # states 
-                if self.display_trace_pump_boiler.get() and mes[15] != -1:
-                    s_pump_boiler = mes[15]
-                    old_y_pump_boiler = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-                     
-                if self.display_trace_pump_home.get() and mes[16] != -1:
-                    s_pump_home = mes[16]
-                    old_y_pump_home = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-                    
-                old_x = old_x
+        for i_trace, trace in enumerate(self.data_for_graph_new):
+            if i_trace < 15:
+                if self.menu_list[i_trace].get():
+#                     print(len(trace))
+                    for i_point in range(len(trace)):
+                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0:
+                            y = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                            y_old = y_val_to_pix * (trace[i_point-1] - self.echelle_y_min) + self.Y_MIN
+                            self.cnv.create_line(x_dat[i_point-1], y_old, x_dat[i_point], y + self.TRACE_WIDTH,
+                                                     width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+#                             pdb.set_trace()
+#         y = 0
+#         # draw the curves
+#         for i, mes in enumerate(self.data_for_graph_new):
+#             # but not for the first pass because old value are not correct
+#             if i > 0: 
+#                 x = i * x_data_to_pix + self.V_PADX
+# #                 print(x, old_x, x-old_x)
+#                 if (x - old_x) > 3:
+#                    
+#                     # afficheurs
+#                     if self.display_trace_salon.get() and mes[12] != -333:
+#                         t_salon = mes[12]
+#                         y = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_salon, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_SALON)
+#                         old_y_salon = y
+#                     if self.display_trace_bureau.get() and mes[13] != -333:
+#                         t_bureau = mes[13]
+#                         y = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_bureau, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_BUREAU)
+#                         old_y_bureau = y
+#                     if self.display_trace_ext.get() and mes[14] != -333:
+#                         t_ext = mes[14]
+#                         y = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_ext, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_EXT)
+#                         old_y_ext = y
+# 
+#                     # PAC
+#                     if self.display_trace_from_pac.get() and mes[0] != -333:
+#                         t_from_pac = mes[0]
+#                         y = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_PAC)
+#                         old_y_from_pac = y
+#                         
+#                     if self.display_trace_to_pac.get() and mes[1] != -333:
+#                         t_to_pac = mes[1]
+#                         y = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_to_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_PAC)
+#                         old_y_to_pac = y
+#              
+#                     if self.display_trace_from_accu.get() and mes[2] != -333:
+#                         t_from_accu = mes[2]
+#                         y = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_accu, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_ACCU)
+#                         old_y_from_accu = y
+#                         
+#                     if self.display_trace_pac_ft.get() and mes[0] != -333 and mes[1] != -333:
+#                         t_pac_ft = mes[0] - mes[1]
+#                         y = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_pac_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
+#                         old_y_pac_ft = y
+#                         
+#                     # Home
+#                     if self.display_trace_on_bypass.get() and mes[3] != -333:
+#                         t_on_bypass = mes[3]
+#                         y = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_on_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
+#                         old_y_on_bypass = y
+#                         
+#                     if self.display_trace_to_home.get() and mes[4] != -333:
+#                         t_to_home = mes[4]
+#                         y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_to_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_HOME)
+#                         old_y_to_home = y
+#                         
+#                     if self.display_trace_from_home_rez.get() and mes[5] != -333:
+#                         t_from_home_rez = mes[5]
+#                         y = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_home_rez, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_REZ)
+#                         old_y_from_home_rez = y
+#                         
+#                     if self.display_trace_from_home_1er.get() and mes[6] != -333:
+#                         t_from_home_1er = mes[6]
+#                         y = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_home_1er, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_1ER)
+#                         old_y_from_home_1er = y
+#                         
+#                     if self.display_trace_from_home.get() and mes[7] != -333:
+#                         t_from_home = mes[7]
+#                         y = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_HOME)
+#                         old_y_from_home = y
+#                         
+#                     if self.display_trace_from_bypass.get() and mes[8] != -333:
+#                         t_from_bypass = mes[8]
+#                         y = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BYPASS)
+#                         old_y_from_bypass = y
+#                         
+#                     if self.display_trace_home_ft.get() and mes[4] != -333 and mes[7] != -333:
+#                         t_to_home = mes[4] - mes[7]
+#                         y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_home_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_HOME)
+#                         old_y_home_ft = y
+# 
+#                     # Boiler
+#                     if self.display_trace_to_boiler.get() and mes[9] != -333:
+#                         t_to_boiler = mes[9]
+#                         y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_to_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_BOILER)
+#                         old_y_to_boiler = y
+#                         
+#                     if self.display_trace_in_boiler.get() and mes[10] != -333:
+#                         t_in_boiler = mes[10]
+#                         y = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_in_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_IN_BOILER)
+#                         old_y_in_boiler = y
+#                         
+#                     if self.display_trace_from_boiler.get() and mes[11] != -333:
+#                         t_from_boiler = mes[11]
+#                         y = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_from_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BOILER)
+#                         old_y_from_boiler = y
+#                         
+#                     if self.display_trace_boiler_ft.get() and mes[9] != -333 and mes[11] != -333:
+#                         t_to_boiler = mes[11] - mes[9]
+#                         y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
+#                         self.cnv.create_line(old_x, old_y_boiler_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_BOILER)
+#                         old_y_boiler_ft = y
+#                         
+#                     # pumps
+#                     # épaisseur du trait = pixels / minutes et un peu plus
+#                     pump_line_width = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
+#                     if self.display_trace_pump_boiler.get() and mes[15] != -1:
+#                         s_pump_boiler = mes[15]
+#                         y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+#                         self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_BOILER)
+#                          
+#                     if self.display_trace_pump_home.get() and mes[16] != -1:
+#                         s_pump_home = mes[16]
+#                         y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+#                         self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
+#                     
+#                     # redraw x-axis
+#                     self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
+#                     # states     
+#                     if self.display_trace_pac_on.get() and mes[17] != -1:
+#                         s_pac_onoff = mes[17]
+#                         if s_pac_onoff == 1:
+#                             self.cnv.create_line(old_x, self.Y_MIN + 2.5, x, self.Y_MIN + 2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
+#                          
+#                     if self.display_trace_boiler_on.get() and mes[17] != -1:
+#                         s_boiler_onoff = mes[18]
+#                         if s_boiler_onoff == 1:
+#                             self.cnv.create_line(old_x, self.Y_MIN + 8, x, self.Y_MIN + 8 , width=5, fill=self.COLOR_BOILER_ON_OFF)
+#                     
+#                     old_x = x
+# 
+#             else: # this is the first pass also initialize the old values
+#                 
+#                 old_x = i * x_data_to_pix + self.V_PADX
+#                 
+#                 # afficheurs
+#                 if self.display_trace_salon.get():
+#                     t_salon = mes[12]
+#                     old_y_salon = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
+#                 
+#                 if self.display_trace_bureau.get():
+#                     t_bureau = mes[13]
+#                     old_y_bureau = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_ext.get():
+#                     t_ext = mes[14]
+#                     old_y_ext = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
+# 
+#                 # PAC
+#                 if self.display_trace_from_pac.get():
+#                     t_from_pac = mes[0]
+#                     old_y_from_pac = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_to_pac.get():
+#                     t_to_pac = mes[1]
+#                     old_y_to_pac = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
+#  
+#                 if self.display_trace_from_accu.get():
+#                     t_from_accu = mes[2]
+#                     old_y_from_accu = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_pac_ft.get():
+#                     t_pac_ft = mes[0] - mes[1]
+#                     old_y_pac_ft = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
+#          
+#                 # home
+#                 if self.display_trace_on_bypass.get():
+#                     t_on_bypass = mes[3]
+#                     old_y_on_bypass = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
+#                     
+#                 if self.display_trace_to_home.get():
+#                     t_to_home = mes[4]
+#                     old_y_to_home = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
+#                     
+#                 if self.display_trace_from_home_rez.get():
+#                     t_from_home_rez = mes[5]
+#                     old_y_from_home_rez = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
+#                     
+#                 if self.display_trace_from_home_1er.get():
+#                     t_from_home_1er = mes[6]
+#                     old_y_from_home_1er = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
+#                     
+#                 if self.display_trace_from_home.get():
+#                     t_from_home = mes[7]
+#                     old_y_from_home = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
+#                     
+#                 if self.display_trace_from_bypass.get():
+#                     t_from_bypass = mes[8]
+#                     old_y_from_bypass = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_home_ft.get():
+#                     t_to_home = mes[4] - mes[7]
+#                     old_y_home_ft = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
+# 
+#                 # boiler
+#                 if self.display_trace_to_boiler.get():
+#                     t_to_boiler = mes[9]
+#                     old_y_to_boiler = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_in_boiler.get():
+#                     t_in_boiler = mes[10]
+#                     old_y_in_boiler = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_from_boiler.get():
+#                     t_from_boiler = mes[11]
+#                     old_y_from_boiler = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
+# 
+#                 if self.display_trace_boiler_ft.get():
+#                     t_boiler_ft = mes[11] - mes[9]
+#                     old_y_boiler_ft = y_val_to_pix * (t_boiler_ft - self.echelle_y_min) + self.Y_MIN
+#                 
+#                 # states 
+#                 if self.display_trace_pump_boiler.get() and mes[15] != -1:
+#                     s_pump_boiler = mes[15]
+#                     old_y_pump_boiler = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
+#                      
+#                 if self.display_trace_pump_home.get() and mes[16] != -1:
+#                     s_pump_home = mes[16]
+#                     old_y_pump_home = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
+#                     
+#                 old_x = old_x
             
         self.t_elapsed = datetime.now() - t_start
         secondes_decimales_str = str(self.t_elapsed).split(".")[1]
@@ -927,6 +950,9 @@ class Main:
             p_str += "".join([" n_row:", str(n_row), " removed:"])
 
             # remove the old(s) record(s) in the data_from_db list
+##########################################
+#             pdb.set_trace()
+##########################################
             while n_removed < n_row:
                 record_to_remove = self.data_from_db[0]
                 self.data_from_db.remove(record_to_remove)
@@ -940,7 +966,7 @@ class Main:
                 p_str += "".join([str(row[0]), "/"])
             
             # adapt the id of the last records
-            self.id_last_fromdb_record = self.data_from_db[-1][20]
+            self.id_last_fromdb_record = max(self.data_for_graph_new[23])
             self.id_last_displayed_record = self.id_last_fromdb_record
             
             p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
@@ -1029,11 +1055,11 @@ class Main:
                 max_found = False
                 for i, row in enumerate(self.data_from_db):
                     
-                    if row[19] >= time_begin_mesure and not min_found:
+                    if row[22] >= time_begin_mesure and not min_found:
                         self.id_first_displayed_record = i
                         min_found = True
                         
-                    if row[19] >= time_end_mesure and not max_found:
+                    if row[22] >= time_end_mesure and not max_found:
                         self.id_last_displayed_record  = i
                         max_found = True
                 # set the zoom indicator
@@ -1316,12 +1342,12 @@ class Main:
             max_found = False
             for row in self.data_from_db:
                 
-                if row[19] >= x_min_date and not min_found:
-                    self.id_first_displayed_record = row[20]
+                if row[22] >= x_min_date and not min_found:
+                    self.id_first_displayed_record = row[23]
                     min_found = True
                     
-                if row[19] >= x_max_date and not max_found:
-                    self.id_last_displayed_record  = row[20]
+                if row[22] >= x_max_date and not max_found:
+                    self.id_last_displayed_record  = row[23]
                     max_found = True
             
             y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
@@ -1448,7 +1474,6 @@ class Main:
 
     def get_min_max(self, sensor_data):
         
-        f = False
         tmp = []
         for l in sensor_data:
             if l != -333:
@@ -1466,7 +1491,7 @@ class Main:
         
         for ix in range(len(graph_data)-2):
             self.scale_list.append(self.get_min_max(graph_data[ix]))
-            print(self.get_min_max(graph_data[ix]))
+#             print(self.get_min_max(graph_data[ix]))
         
         y_min = 9999999
         y_max = -9999999
@@ -1490,10 +1515,11 @@ class Main:
             
         if y_max > 0:
             y_max_ret += graduation_step
-        print(y_min_ret, y_max_ret, graduation_step)
+#         print(y_min_ret, y_max_ret, graduation_step)
         return y_min_ret, y_max_ret, graduation_step
 
     def rgb_color(self, rgb):
+        
         """translates an rgb tuple of int to a tkinter friendly color code
         """
         return "#%02x%02x%02x" % rgb   
