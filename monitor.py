@@ -94,7 +94,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 9 # 6/24
+        self.NBRE_DAYS_ON_GRAPH = 0.5/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -215,10 +215,13 @@ class Main:
         # utilisé pendant la sélection de la zone
         self.added_rectangle = []
         # index des datas a afficher en cas de zoom x
+        self.data_from_db = []
         self.data_for_graph = []
+        self.data_for_graph_new = []
         self.id_first_displayed_record = 0
         self.id_last_displayed_record = 0
         self.nbre_records_in_data_from_db = 0
+        self.scale_list = []
         # axe des y curseurs
         self.mouse_events_y = [] # liste des dot lines utiles pendant la création
         self.mouse_cursors_y = [] # liste des dot lines horizontales placées
@@ -577,18 +580,27 @@ class Main:
         # read the database for data's for graph
         t_start = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
-        self.data_from_db = list(self.data_from_db)
-#         print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
+
+        for sensor in range(len(self.data_from_db[0])):
+            colonne = []
+            for record in range(len(self.data_from_db)):
+                colonne.append(self.data_from_db[record][sensor])
+            self.data_for_graph_new.append(colonne)
+            
+        print("\nMatrix inverted", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        t_start = datetime.now()
         
         # initialize the last id in the graph_data
-        self.id_first_displayed_record = self.data_from_db[0][20]
-        self.id_last_displayed_record = self.data_from_db[-1][20]
+        self.id_first_displayed_record = min(self.data_for_graph_new[20])
+        self.id_last_displayed_record = max(self.data_for_graph_new[20])
         
-        self.id_first_fromdb_record = self.data_from_db[0][20]
-        self.id_last_fromdb_record = self.data_from_db[-1][20]
+        self.id_first_fromdb_record = min(self.data_for_graph_new[20])
+        self.id_last_fromdb_record = max(self.data_for_graph_new[20])
         
-        self.nbre_records_in_data_from_db = len(self.data_from_db)
-        
+        self.nbre_records_in_data_from_db = len(self.data_for_graph_new[20])
+
         self.refresh_display()
         
 
@@ -604,12 +616,12 @@ class Main:
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
         t_mes_start = datetime.now()
-        for row in self.data_from_db:
-            # ajouter à data_for_graph
-            if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
-                self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
-                                       row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
-        i_last = len(self.data_for_graph) - 1
+#         for row in self.data_from_db:
+#             # ajouter à data_for_graph
+#             if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
+#                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
+#                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
+#         i_last = len(self.data_for_graph) - 1
 #         print("id_first_displayed_record:",self.id_first_displayed_record,
 #               "id_last_displayed_record:",self.id_last_displayed_record,
 #               "len(data_for_graph):", len(self.data_for_graph))
@@ -617,22 +629,24 @@ class Main:
         # Calcul % PAC ON
         count_on = 0
         count_tot = 0
-        for p in self.data_for_graph:
+        for p in self.data_for_graph_new[17]:
             count_tot += 1
-            if p[17] > 0:
+            if p > 0:
                 count_on += 1
         if count_tot > 0:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
-#         print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
-            
+
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
-        self.t_salon = float(self.data_for_graph[i_last][12])
-        self.t_bureau = float(self.data_for_graph[i_last][13])
-        self.t_ext = float(self.data_for_graph[i_last][14])
+        
+        i_last = len(self.data_for_graph_new) - 1
+        self.t_salon = float(self.data_for_graph_new[12][i_last])
+        self.t_bureau = float(self.data_for_graph_new[13][i_last])
+        self.t_ext = float(self.data_for_graph_new[14][i_last])
         # Afficher les valeurs
         # Salon
         self.val_temp_salon.set("".join([str(round(self.t_salon, 1)), "°C"]))
@@ -646,8 +660,12 @@ class Main:
         # echelles min et max pour les ordonnées
         t_scale_start = datetime.now()
         if not self.zoom_active:
-            self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph)
-#         print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
+            self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph_new)
+        print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
+        t_scale_start = datetime.now()
+##########################################
+        pdb.set_trace()
+##########################################
 
         # initialize date and time
         datetime_start_plot = self.data_for_graph[0][19]
@@ -687,7 +705,7 @@ class Main:
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
         
-#         print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
 
         # PAC label only if PAC or boiler is displayed
@@ -756,7 +774,7 @@ class Main:
                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
         
-#         print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
         
         y = 0
@@ -1003,7 +1021,7 @@ class Main:
         t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
         t_pause = self.t_pause - t_elapsed
         
-#         print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
         
         # read the database for data's to append to the graph
@@ -1058,7 +1076,7 @@ class Main:
                 self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
         # pause the program for a while (t_pause) and after that restat it
-#         print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
+        print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
 #         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
 #                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
 #         print("waiting for next display update", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
@@ -1537,96 +1555,25 @@ class Main:
             else:
                 n = 0.25
         return n
+
+    def get_min_max(self, sensor_data):
+        for l in sensor_data:
+            for x in l:
+                if x == -3333:
+                    l.remove(x)
+        y_min = min(sensor_data)
+        y_max = max(sensor_data)
+        
+        return [y_min, y_max]
         
 
     # calcul arrondi pour echelle y
     def get_minmax_echelle_y(self, graph_data):
 
-        # initialize  scale pour les ordonnées
-        y_max = -99999
-        y_min = 99999
         
-        for t in graph_data:
+        for index, sensor in enumerate(graph_data):
+            self.scale_list.append(get_min_max(sensor))
 
-            # afficheurs
-            if self.display_trace_salon.get() and t[12] != -333:
-                y_min = min(y_min, t[12])
-                y_max = max(y_max, t[12])
-                
-            if self.display_trace_bureau.get() and t[13] != -333:
-                y_min = min(y_min, t[13])
-                y_max = max(y_max, t[13])
-                
-            if self.display_trace_ext.get() and t[14] != -333:
-                y_min = min(y_min, t[14])
-                y_max = max(y_max, t[14])
-            
-            # PAC
-            if self.display_trace_from_pac.get() and t[0] != -333:
-                y_min = min(y_min, t[0])
-                y_max = max(y_max, t[0])
-                
-            if self.display_trace_to_pac.get() and t[1] != -333:
-                y_min = min(y_min, t[1])
-                y_max = max(y_max, t[1])
-                
-            if self.display_trace_from_accu.get() and t[2] != -333:
-                y_min = min(y_min, t[2])
-                y_max = max(y_max, t[2])
-                
-            if self.display_trace_pac_ft.get() and t[0] != -333 and t[1] != -333:
-                t_delta_pas = t[0] - t[1]
-                y_min = min(y_min, t_delta_pas)
-                y_max = max(y_max, t_delta_pas)
-                
-            # home
-            if self.display_trace_on_bypass.get() and t[3] != -333:
-                y_min = min(y_min, t[3])
-                y_max = max(y_max, t[3])
-                
-            if self.display_trace_to_home.get() and t[4] != -333:
-                y_min = min(y_min, t[4])
-                y_max = max(y_max, t[4])
-                
-            if self.display_trace_from_home_rez.get() and t[5] != -333:
-                y_min = min(y_min, t[5])
-                y_max = max(y_max, t[5])
-                
-            if self.display_trace_from_home_1er.get() and t[6] != -333:
-                y_min = min(y_min, t[6])
-                y_max = max(y_max, t[6])
-                
-            if self.display_trace_from_home.get() and t[7] != -333:
-                y_min = min(y_min, t[7])
-                y_max = max(y_max, t[7])
-                
-            if self.display_trace_from_bypass.get() and t[8] != -333:
-                y_min = min(y_min, t[8])
-                y_max = max(y_max, t[8])
-                
-            if self.display_trace_home_ft.get() and t[4] != -333 and t[7] != -333:
-                t_delta_home = t[4] - t[7]
-                y_min = min(y_min, t_delta_home)
-                y_max = max(y_max, t_delta_home)
-                
-            # boiler
-            if self.display_trace_to_boiler.get() and t[9] != -333:
-                y_min = min(y_min, t[9])
-                y_max = max(y_max, t[9])
-                 
-            if self.display_trace_in_boiler.get() and t[10] != -333:
-                y_min = min(y_min, t[10])
-                y_max = max(y_max, t[10])
-                
-            if self.display_trace_from_boiler.get() and t[11] != -333:
-                y_min = min(y_min, t[11])
-                y_max = max(y_max, t[11])
-                
-            if self.display_trace_boiler_ft.get() and t[9] != -333 and t[11] != -333:
-                t_delta_boiler = t[11] - t[9]
-                y_min = min(y_min, t_delta_boiler)
-                y_max = max(y_max, t_delta_boiler)
-        
         if y_max < y_min:
             y_max = 20
             y_min = 0
