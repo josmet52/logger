@@ -113,83 +113,39 @@ class Main:
 
         # variable de commande pour l'affichage des différentes traces
         # afficheurs
-        self.display_trace_salon = IntVar(self.tk_root)
-        self.display_trace_bureau = IntVar(self.tk_root)
-        self.display_trace_ext = IntVar(self.tk_root)
+        self.menu_val = [False if x <12 else True for x in range(21)]
+        self.menu_list = [IntVar(tk_root) for i in range(21)]
+        # PAC, Home, Boiler, Afficheurs, States, f-t, toggle
+        self.menu_label =['Fr. PAC','To PAC','Fr. accu',
+                          'On bypass','To home','Fr. rez','Fr. 1er','Fr. home','Fr. bypass',
+                          'To boiler','In boiler','Fr. boiler',
+                          'Salon','Bureau','Extérieur',
+                          'Pump boiler','Pump home','Boiler on-off','PAC on-off',
+                          'PAC f-t','Home t-f','Boiler t-f',
+                          'PAC toggle','Home toggle','Boiler toggle','Maison toggle','States toggle',
+                          'All','Nothing']
+        self.menu_separator =[2, 8, 11, 14, 18, 21, 26]
+        self.label_separator =[2, 8, 11, 14, 18]
+        # PAC, Home, Boiler, Afficheurs, States, f-t, toggle
+        self.menu_color = [self.rgb_color((190, 118, 112)), self.rgb_color((207, 15, 110)), self.rgb_color((19, 36, 161)), self.rgb_color((199, 155, 117)),
+                           self.rgb_color((200, 200, 200)), self.rgb_color((38, 103, 191)), self.rgb_color((162, 41, 10)), self.rgb_color((124, 165, 155)), self.rgb_color((0, 136, 124)), self.rgb_color((242, 18, 44)),
+                           self.rgb_color((251, 143, 136)), self.rgb_color((196, 42, 237)), self.rgb_color((174, 175, 150)),
+                           self.rgb_color((199, 77, 127)), self.rgb_color((106, 150, 193)), self.rgb_color((32, 110, 224)),
+                           self.rgb_color((35, 221, 253)), self.rgb_color((158, 153, 182)), self.rgb_color((255, 0, 0)), self.rgb_color((3, 55, 246)),
+                           self.rgb_color((210, 165, 0)), self.rgb_color((239, 2, 193)), self.rgb_color((63, 54, 80)), self.rgb_color((199, 84, 29))]
         
-        # PAC
-        self.display_trace_from_pac = IntVar(self.tk_root)
-        self.display_trace_from_accu = IntVar(self.tk_root)
-        self.display_trace_to_pac = IntVar(self.tk_root)
-        self.display_trace_pac_ft = IntVar(self.tk_root)
-        
-        #Home
-        self.display_trace_on_bypass = IntVar(self.tk_root)
-        self.display_trace_from_home = IntVar(self.tk_root)
-        self.display_trace_from_home_rez = IntVar(self.tk_root)
-        self.display_trace_from_home_1er = IntVar(self.tk_root)
-        self.display_trace_to_home = IntVar(self.tk_root)
-        self.display_trace_from_bypass = IntVar(self.tk_root)
-        self.display_trace_home_ft = IntVar(self.tk_root)
-        
-        # Boiler
-        self.display_trace_from_boiler = IntVar(self.tk_root)
-        self.display_trace_to_boiler = IntVar(self.tk_root)
-        self.display_trace_in_boiler = IntVar(self.tk_root)
-        self.display_trace_boiler_ft = IntVar(self.tk_root)
-        
-        # states pac et boiler
-        self.display_trace_pump_boiler = IntVar(self.tk_root)
-        self.display_trace_pump_home = IntVar(self.tk_root)
-        self.display_trace_boiler_on = IntVar(self.tk_root)
-        self.display_trace_pac_on = IntVar(self.tk_root)
-        self.pixels_heigt_for_states = 25
 
         # affichages des valeurs sur le curseur de la souris
         self.display_valeur_x = IntVar(self.tk_root)
         self.display_valeur_y = IntVar(self.tk_root)
-        
-        # choix de la source pour la database
-        self.selected_ip = IntVar(self.tk_root)
-        self.selected_ip.set(self.ip_db_server)
-
-        # initialisation des variables
-        # afficheurs
-        self.display_trace_salon.set(True)
-        self.display_trace_bureau.set(True)
-        self.display_trace_ext.set(True)
-        
-        # PAC
-        self.display_trace_from_pac.set(False)
-        self.display_trace_from_accu.set(False)
-        self.display_trace_to_pac.set(False)
-        self.display_trace_pac_ft.set(False)
-        
-        #Home
-        self.display_trace_on_bypass.set(False)
-        self.display_trace_from_home.set(False)
-        self.display_trace_from_home_rez.set(False)
-        self.display_trace_from_home_1er.set(False)
-        self.display_trace_to_home.set(False)
-        self.display_trace_from_bypass.set(False)
-        self.display_trace_home_ft.set(False)
-        
-        # Boiler
-        self.display_trace_from_boiler.set(False)
-        self.display_trace_to_boiler.set(False)
-        self.display_trace_in_boiler.set(False)
-        self.display_trace_boiler_ft.set(False)
-        
-        # states PAC et boiler
-        self.display_trace_pump_boiler.set(True)
-        self.display_trace_pump_home.set(True)
-        self.display_trace_boiler_on.set(True)
-        self.display_trace_pac_on.set(True)
-        
         # valeurs sur curseur souris
         self.display_valeur_x.set(False)
         self.display_valeur_y.set(True)
         self.mouse_info = None # pour placer le texte sur le curseur de la sourtis
+        
+        # choix de la source pour la database
+        self.selected_ip = IntVar(self.tk_root)
+        self.selected_ip.set(self.ip_db_server)
         
         # memoire de l'ancienne position de la souris
         self.mouse_x = 0
@@ -253,35 +209,6 @@ class Main:
         self.FONT_TEXT_MEDIUM = "".join(["Helvetica ",str(int(12*self.win_width/self.max_width))])
         self.FONT_TEXT_SMALL = "".join(["Helvetica ",str(int(10*self.win_width/self.max_width))])
         self.FONT_TEMP = "".join(["Helvetica ",str(int(70*self.win_width/self.max_width))])
-
-        # afficheurs
-        self.COLOR_SALON = self.color_from_rgb((199, 77, 127))
-        self.COLOR_BUREAU = self.color_from_rgb((106, 150, 193))
-        self.COLOR_EXT = self.color_from_rgb((32, 110, 224))
-        self.COLOR_PAC_VAL = self.color_from_rgb((199, 84, 29))
-        # pac
-        self.COLOR_FROM_PAC = self.color_from_rgb((190, 118, 112))
-        self.COLOR_TO_PAC = self.color_from_rgb((207, 15, 110))
-        self.COLOR_FROM_ACCU = self.color_from_rgb((19, 36, 161))
-        self.COLOR_ON_BYPASS = self.color_from_rgb((199, 155, 117))
-        self.COLOR_FT_PAC = self.color_from_rgb((210, 165, 0))
-        # home
-        self.COLOR_TO_HOME = self.color_from_rgb((38, 103, 191))
-        self.COLOR_FROM_REZ = self.color_from_rgb((162, 41, 10))
-        self.COLOR_FROM_1ER = self.color_from_rgb((124, 165, 155))
-        self.COLOR_FROM_HOME = self.color_from_rgb((0, 136, 124))
-        self.COLOR_FROM_BYPASS = self.color_from_rgb((242, 18, 44))
-        self.COLOR_FT_HOME = self.color_from_rgb((239, 2, 193))
-        # boiler
-        self.COLOR_TO_BOILER = self.color_from_rgb((251, 143, 136))
-        self.COLOR_IN_BOILER = self.color_from_rgb((196, 42, 237))
-        self.COLOR_FROM_BOILER = self.color_from_rgb((174, 175, 150))
-        self.COLOR_FT_BOILER = self.color_from_rgb((63, 54, 80))
-        # states
-        self.COLOR_PUMP_BOILER = self.color_from_rgb((35, 221, 253))#191, 170, 138))
-        self.COLOR_PUMP_HOME = self.color_from_rgb((158, 153, 182))#168, 186, 213))
-        self.COLOR_PAC_ON_OFF = self.color_from_rgb((255, 0, 0))
-        self.COLOR_BOILER_ON_OFF = self.color_from_rgb((3, 55, 246))
         
         self.GRID_COLOR = "silver"
         self.RECTANGLE_COLOR = "purple"
@@ -308,40 +235,20 @@ class Main:
         v_column_span = 16
         v_row = 0
         v_column = 0
-        tk.Label(self.tk_root,
-                 text="Salon",
-                 fg = self.FG_COLOR_TEXT,
-                 bg = self.BG_COLOR_LABEL,
-                 font = self.FONT_TEXT,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text=self.menu_label[12], fg = self.FG_COLOR_TEXT, bg = self.BG_COLOR_LABEL, font = self.FONT_TEXT,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         # bureau
-        tk.Label(self.tk_root,
-                 text="Bureau",
-                 fg = self.FG_COLOR_TEXT,
-                 bg = self.BG_COLOR_LABEL,
-                 font = self.FONT_TEXT,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text=self.menu_label[13], fg = self.FG_COLOR_TEXT, bg = self.BG_COLOR_LABEL, font = self.FONT_TEXT,
+                 padx = self.padx,pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         # extérieur
-        tk.Label(self.tk_root,
-                 text="Extérieur",
-                 fg = self.FG_COLOR_TEXT,
-                 bg = self.BG_COLOR_LABEL,
-                 font = self.FONT_TEXT,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text=self.menu_label[14], fg = self.FG_COLOR_TEXT, bg = self.BG_COLOR_LABEL, font = self.FONT_TEXT,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         v_column += v_column_span
         # pac on-off
-        tk.Label(self.tk_root,
-                 text="PAC on-off",
-                 fg = self.FG_COLOR_TEXT,
-                 bg = self.BG_COLOR_LABEL,
-                 font = self.FONT_TEXT,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, text=self.menu_label[17], fg = self.FG_COLOR_TEXT, bg = self.BG_COLOR_LABEL, font = self.FONT_TEXT,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         
         # 2eme ligne de la GRID : les afficheurs de température
         v_row = 1
@@ -350,101 +257,40 @@ class Main:
         # Salon
         self.val_temp_salon = StringVar()
         tk.Label(self.tk_root,
-                 textvariable=self.val_temp_salon,
-                 fg = self.COLOR_SALON,
-                 bg = self.BG_COLOR,
-                 font = self.FONT_TEMP,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+                 textvariable=self.val_temp_salon, fg = self.menu_color[12], bg = self.BG_COLOR, font = self.FONT_TEMP,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         # Bureau
         v_column += v_column_span
         self.val_temp_bureau = StringVar()
-        tk.Label(self.tk_root,
-                 textvariable=self.val_temp_bureau,
-                 fg = self.COLOR_BUREAU,
-                 bg = self.BG_COLOR,
-                 font = self.FONT_TEMP,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, textvariable=self.val_temp_bureau, fg = self.menu_color[13], bg = self.BG_COLOR, font = self.FONT_TEMP,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         # Extérieur
         v_column += v_column_span
         self.val_temp_ext = StringVar()
-        tk.Label(self.tk_root,
-                 textvariable=self.val_temp_ext,
-                 fg = self.COLOR_EXT,
-                 bg = self.BG_COLOR,
-                 font = self.FONT_TEMP,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, textvariable=self.val_temp_ext, fg = self.menu_color[14], bg = self.BG_COLOR, font = self.FONT_TEMP,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         # PAC
         v_column += v_column_span
         self.val_pac = StringVar()
-        tk.Label(self.tk_root,
-                 textvariable=self.val_pac,
-                 fg = self.COLOR_PAC_VAL,
-                 bg = self.BG_COLOR,
-                 font = self.FONT_TEMP,
-                 padx = self.padx,
-                 pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+        tk.Label(self.tk_root, textvariable=self.val_pac, fg = self.menu_color[17], bg = self.BG_COLOR, font = self.FONT_TEMP,
+                 padx = self.padx, pady = self.pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
         
         # initialisations pour la 3ème ligne de la GRID : les étiquettes des courbes
         v_row = 2
         v_column_span = 3
         v_column = 3
         v_pady = 20
-        
-        # Afficheurs
-        tk.Label(self.tk_root, text = "   --- Salon", pady = v_pady, fg = self.COLOR_SALON, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Bureau", pady = v_pady, fg = self.COLOR_BUREAU, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Extérieur", pady = v_pady, fg = self.COLOR_EXT, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        
-        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
-        v_column += 1
-        
-        # PAC
-        tk.Label(self.tk_root, text = "--- Fr. PAC", pady = v_pady, fg = self.COLOR_FROM_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- To PAC", pady = v_pady, fg = self.COLOR_TO_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. accu", pady = v_pady, fg = self.COLOR_FROM_ACCU, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- On bypass", pady = v_pady, fg = self.COLOR_ON_BYPASS, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- PAC f-t", pady = v_pady, fg = self.COLOR_FT_PAC, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        
-        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
-        v_column += 1
-        
-        # Home
-        tk.Label(self.tk_root, text = "--- To home", pady = v_pady, fg = self.COLOR_TO_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. rez", pady = v_pady, fg = self.COLOR_FROM_REZ, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. 1er", pady = v_pady, fg = self.COLOR_FROM_1ER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. home", pady = v_pady, fg = self.COLOR_FROM_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. bypass", pady = v_pady, fg = self.COLOR_FROM_BYPASS, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Home f-t", pady = v_pady, fg = self.COLOR_FT_HOME, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        
-        tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column)
-        v_column += 1
-        
-        # Boiler
-        tk.Label(self.tk_root, text = "--- To boiler", pady = v_pady, fg = self.COLOR_TO_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- In. boiler", pady = v_pady, fg = self.COLOR_IN_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Fr. boiler", pady = v_pady, fg = self.COLOR_FROM_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
-        tk.Label(self.tk_root, text = "--- Boiler f-t", pady = v_pady, fg = self.COLOR_FT_BOILER, bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL).grid(row=v_row, column=v_column, columnspan=v_column_span)
-        v_column += v_column_span
+
+        # label en couleur pour identifier les courbes
+        for i in range(22):
+            if i < 15 or i > 18:
+                tk.Label(self.tk_root, text = "--- " + self.menu_label[i], fg = self.menu_color[i], bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL,
+                         pady = v_pady).grid(row=v_row, column=v_column, columnspan=v_column_span)
+                v_column += v_column_span
+                if i in self.label_separator:
+                    tk.Label(self.tk_root, text = " || ", pady = v_pady, fg = 'black', bg = self.BG_COLOR_LABEL, font = self.FONT_LABEL
+                             ).grid(row=v_row, column=v_column)
+                    v_column += 1
  
         # initialize le canvas pour le graphique des températures
         self.cnv = tk.Canvas(bg = self.COLOR_BG_CANVAS, height = 0.8 * self.win_height, width = self.win_width)
@@ -470,46 +316,61 @@ class Main:
         
         # menu courbes de température
         curvesmenu = Menu(menubar, tearoff=0)
-        # afficheurs
-        curvesmenu.add_checkbutton(label="Salon", font = self.FONT_LABEL, variable = self.display_trace_salon, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Bureau", font = self.FONT_LABEL, variable = self.display_trace_bureau, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Extérieur", font = self.FONT_LABEL, variable = self.display_trace_ext, command = self.change_curves_on_display)
-        curvesmenu.add_command(label="Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
-        curvesmenu.add_separator()
-        # PAC
-        curvesmenu.add_checkbutton(label="From PAC", font = self.FONT_LABEL, variable = self.display_trace_from_pac, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="To PAC", font = self.FONT_LABEL, variable = self.display_trace_to_pac, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From accu", font = self.FONT_LABEL, variable = self.display_trace_from_accu, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="PAC from-to", font = self.FONT_LABEL, variable = self.display_trace_pac_ft, command = self.change_curves_on_display)
+        for i in range(21):
+            curvesmenu.add_checkbutton(label=self.menu_label[i], variable=self.menu_list[i], foreground=self.menu_color[i],
+                                           command = self.change_curves_on_display)
+            if i in self.menu_separator:
+                curvesmenu.add_separator()
         curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
-        curvesmenu.add_separator()
-        # home
-        curvesmenu.add_checkbutton(label="On bypass", font = self.FONT_LABEL, variable = self.display_trace_on_bypass, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="To home", font = self.FONT_LABEL, variable = self.display_trace_to_home, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From home rez", font = self.FONT_LABEL, variable = self.display_trace_from_home_rez, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From home 1er", font = self.FONT_LABEL, variable = self.display_trace_from_home_1er, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From home", font = self.FONT_LABEL, variable = self.display_trace_from_home, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From bypass", font = self.FONT_LABEL, variable = self.display_trace_from_bypass, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Home from-to", font = self.FONT_LABEL, variable = self.display_trace_home_ft, command = self.change_curves_on_display)
         curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
-        curvesmenu.add_separator()
-        # boiler
-        curvesmenu.add_checkbutton(label="To boiler", font = self.FONT_LABEL, variable = self.display_trace_to_boiler, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="In boiler", font = self.FONT_LABEL, variable = self.display_trace_in_boiler, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="From boiler", font = self.FONT_LABEL, variable = self.display_trace_from_boiler, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Boiler from-to", font = self.FONT_LABEL, variable = self.display_trace_boiler_ft, command = self.change_curves_on_display)
         curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
-        curvesmenu.add_separator()
-        # states
-        curvesmenu.add_checkbutton(label="Pump boiler", font = self.FONT_LABEL, variable = self.display_trace_pump_boiler, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Pump home", font = self.FONT_LABEL, variable = self.display_trace_pump_home, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
-        curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
-        curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
+        curvesmenu.add_command(label="Afficheurs Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
         curvesmenu.add_separator()
         curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
         curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
-        menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
+                
+# 
+# 
+#         # afficheurs
+#         curvesmenu.add_checkbutton(label="Salon", font = self.FONT_LABEL, variable = self.display_trace_salon, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Bureau", font = self.FONT_LABEL, variable = self.display_trace_bureau, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Extérieur", font = self.FONT_LABEL, variable = self.display_trace_ext, command = self.change_curves_on_display)
+#         curvesmenu.add_command(label="Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
+#         curvesmenu.add_separator()
+#         # PAC
+#         curvesmenu.add_checkbutton(label="From PAC", font = self.FONT_LABEL, variable = self.display_trace_from_pac, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="To PAC", font = self.FONT_LABEL, variable = self.display_trace_to_pac, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From accu", font = self.FONT_LABEL, variable = self.display_trace_from_accu, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="PAC from-to", font = self.FONT_LABEL, variable = self.display_trace_pac_ft, command = self.change_curves_on_display)
+#         curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
+#         curvesmenu.add_separator()
+#         # home
+#         curvesmenu.add_checkbutton(label="On bypass", font = self.FONT_LABEL, variable = self.display_trace_on_bypass, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="To home", font = self.FONT_LABEL, variable = self.display_trace_to_home, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From home rez", font = self.FONT_LABEL, variable = self.display_trace_from_home_rez, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From home 1er", font = self.FONT_LABEL, variable = self.display_trace_from_home_1er, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From home", font = self.FONT_LABEL, variable = self.display_trace_from_home, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From bypass", font = self.FONT_LABEL, variable = self.display_trace_from_bypass, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Home from-to", font = self.FONT_LABEL, variable = self.display_trace_home_ft, command = self.change_curves_on_display)
+#         curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
+#         curvesmenu.add_separator()
+#         # boiler
+#         curvesmenu.add_checkbutton(label="To boiler", font = self.FONT_LABEL, variable = self.display_trace_to_boiler, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="In boiler", font = self.FONT_LABEL, variable = self.display_trace_in_boiler, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="From boiler", font = self.FONT_LABEL, variable = self.display_trace_from_boiler, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Boiler from-to", font = self.FONT_LABEL, variable = self.display_trace_boiler_ft, command = self.change_curves_on_display)
+#         curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
+#         curvesmenu.add_separator()
+#         # states
+#         curvesmenu.add_checkbutton(label="Pump boiler", font = self.FONT_LABEL, variable = self.display_trace_pump_boiler, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Pump home", font = self.FONT_LABEL, variable = self.display_trace_pump_home, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
+#         curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
+#         curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
+#         curvesmenu.add_separator()
+#         curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
+#         curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
+#         menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
         
         # menu mesures 
         self.mesuremenu = Menu(menubar, tearoff=0)
@@ -1570,31 +1431,31 @@ class Main:
     # calcul arrondi pour echelle y
     def get_minmax_echelle_y(self, graph_data):
 
-        
-        for index, sensor in enumerate(graph_data):
-            self.scale_list.append(get_min_max(sensor))
+#         
+#         for index, sensor in enumerate(graph_data):
+#             self.scale_list.append(get_min_max(sensor))
 
-        if y_max < y_min:
-            y_max = 20
-            y_min = 0
-                
-        graduation_step = self.get_y_graduation_step(y_min , y_max)        
+#         if y_max < y_min:
+#             y_max = 20
+#             y_min = 0
+#                 
+#         graduation_step = self.get_y_graduation_step(y_min , y_max)        
+#             
+#                 
+#         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
+#             y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
+#             y_max_ret = (y_max // graduation_step) * graduation_step
+#         else:
+#             y_min_ret = (y_min // graduation_step) * graduation_step  
+#             y_max_ret = (y_max // graduation_step) * graduation_step
+#             
+#         if y_max > 0:
+#             y_max_ret += graduation_step
             
-                
-        if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
-            y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
-            y_max_ret = (y_max // graduation_step) * graduation_step
-        else:
-            y_min_ret = (y_min // graduation_step) * graduation_step  
-            y_max_ret = (y_max // graduation_step) * graduation_step
-            
-        if y_max > 0:
-            y_max_ret += graduation_step
-            
-        return y_min_ret, y_max_ret, graduation_step
+#         return y_min_ret, y_max_ret, graduation_step
+        return 0, 20 ,2
 
-
-    def color_from_rgb(self, rgb):
+    def rgb_color(self, rgb):
         """translates an rgb tuple of int to a tkinter friendly color code
         """
         return "#%02x%02x%02x" % rgb   
