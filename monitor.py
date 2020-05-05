@@ -534,7 +534,7 @@ class Main:
         else:
             self.pac_on_off = 0
             
-        print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("\ndata is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         
         t_mes_start = datetime.now()
 
@@ -678,17 +678,24 @@ class Main:
             x_dat.append(i * x_data_to_pix + self.V_PADX)
 #             print(i, i * x_data_to_pix + self.V_PADX)
         t_mes_start = datetime.now()
-
+        
         for i_trace, trace in enumerate(self.data_for_graph_new):
             if i_trace < 15:
                 if self.menu_list[i_trace].get():
 #                     print(len(trace))
                     for i_point in range(len(trace)):
                         if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0:
-                            y = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                            y_old = y_val_to_pix * (trace[i_point-1] - self.echelle_y_min) + self.Y_MIN
-                            self.cnv.create_line(x_dat[i_point-1], y_old, x_dat[i_point], y + self.TRACE_WIDTH,
-                                                     width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+                            if abs(x_dat[i_point] - x_old) > 2:
+                                x_new = x_dat[i_point]
+                                y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
+                                                         width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+                                x_old = x_dat[i_point]
+                                y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                        elif i_point == 0:
+                            x_old = x_dat[i_point]
+                            y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                            
 #                             pdb.set_trace()
 #         y = 0
 #         # draw the curves
