@@ -578,7 +578,7 @@ class Main:
         t_start = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
         self.data_from_db = list(self.data_from_db)
-        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+#         print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
         
         # initialize the last id in the graph_data
         self.id_first_displayed_record = self.data_from_db[0][20]
@@ -625,7 +625,7 @@ class Main:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
-        print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+#         print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
             
         # Affichage des températures actuelles
@@ -647,7 +647,7 @@ class Main:
         t_scale_start = datetime.now()
         if not self.zoom_active:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph)
-        print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
+#         print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
 
         # initialize date and time
         datetime_start_plot = self.data_for_graph[0][19]
@@ -687,7 +687,7 @@ class Main:
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
         
-        print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+#         print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
 
         # PAC label only if PAC or boiler is displayed
@@ -756,7 +756,7 @@ class Main:
                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
         
-        print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+#         print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
         
         y = 0
@@ -1003,7 +1003,7 @@ class Main:
         t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
         t_pause = self.t_pause - t_elapsed
         
-        print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+#         print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
         t_mes_start = datetime.now()
         
         # read the database for data's to append to the graph
@@ -1058,7 +1058,7 @@ class Main:
                 self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
         # pause the program for a while (t_pause) and after that restat it
-        print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
+#         print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
 #         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
 #                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
 #         print("waiting for next display update", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
@@ -1545,8 +1545,6 @@ class Main:
         # initialize  scale pour les ordonnées
         y_max = -99999
         y_min = 99999
-        
-        pdb.set_trace()
         
         for t in graph_data:
 
