@@ -94,7 +94,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 0.5/24
+        self.NBRE_DAYS_ON_GRAPH = 10#10/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -113,8 +113,10 @@ class Main:
 
         # variable de commande pour l'affichage des différentes traces
         # afficheurs
-        self.menu_val = [False if x <12 else True for x in range(21)]
-        self.menu_list = [IntVar(tk_root) for i in range(21)]
+        self.menu_val = [False if x <12 or x > 18 else True for x in range(22)]
+        self.menu_list = [IntVar(tk_root) for i in range(22)]
+        for i in range(22):
+            self.menu_list[i].set(self.menu_val[i])
         # PAC, Home, Boiler, Afficheurs, States, f-t, toggle
         self.menu_label =['Fr. PAC','To PAC','Fr. accu',
                           'On bypass','To home','Fr. rez','Fr. 1er','Fr. home','Fr. bypass',
@@ -316,18 +318,19 @@ class Main:
         
         # menu courbes de température
         curvesmenu = Menu(menubar, tearoff=0)
-        for i in range(21):
-            curvesmenu.add_checkbutton(label=self.menu_label[i], variable=self.menu_list[i], foreground=self.menu_color[i],
+        for i in range(22):
+            curvesmenu.add_checkbutton(label=str(i)+"-"+self.menu_label[i], variable=self.menu_list[i], foreground=self.menu_color[i],
                                            command = self.change_curves_on_display)
             if i in self.menu_separator:
                 curvesmenu.add_separator()
-        curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
-        curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
-        curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
-        curvesmenu.add_command(label="Afficheurs Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
+        curvesmenu.add_command(label="22-PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
+        curvesmenu.add_command(label="23-Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
+        curvesmenu.add_command(label="24-Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
+        curvesmenu.add_command(label="25-Afficheurs Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
         curvesmenu.add_separator()
-        curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
-        curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
+        curvesmenu.add_command(label="26-All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
+        curvesmenu.add_command(label="27-Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
+        menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
                 
 # 
 # 
@@ -444,13 +447,44 @@ class Main:
         print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
         t_start = datetime.now()
 
-        for sensor in range(len(self.data_from_db[0])):
+        # sensors
+        for sensor in range(len(self.data_from_db[0])-2):
+            colonne = []
+            for record in range(len(self.data_from_db)):
+                colonne.append(self.data_from_db[record][sensor])
+            self.data_for_graph_new.append(colonne)
+        # PAC ft
+        tmp = []
+        for ix in range(len(self.data_for_graph_new[0])):
+            if self.data_for_graph_new[0][ix] == -333 or self.data_for_graph_new[1][ix] == -333:
+                tmp.append(-333)
+            else:
+                tmp.append(self.data_for_graph_new[0][ix] - self.data_for_graph_new[1][ix])
+        self.data_for_graph_new.append(tmp)
+        # Home ft
+        tmp = []
+        for ix in range(len(self.data_for_graph_new[0])):
+            if self.data_for_graph_new[4][ix] == -333 or self.data_for_graph_new[7][ix] == -333:
+                tmp.append(-333)
+            else:
+                tmp.append(self.data_for_graph_new[4][ix] - self.data_for_graph_new[7][ix])
+        self.data_for_graph_new.append(tmp)
+        # Boiler ft
+        tmp = []
+        for ix in range(len(self.data_for_graph_new[0])):
+            if self.data_for_graph_new[11][ix] == -333 or self.data_for_graph_new[9][ix] == -333:
+                tmp.append(-333)
+            else:
+                tmp.append(self.data_for_graph_new[11][ix] - self.data_for_graph_new[9][ix])
+        self.data_for_graph_new.append(tmp)
+        # time and id
+        for sensor in range(len(self.data_from_db[0])-2, len(self.data_from_db[0])):
             colonne = []
             for record in range(len(self.data_from_db)):
                 colonne.append(self.data_from_db[record][sensor])
             self.data_for_graph_new.append(colonne)
             
-        print("\nMatrix inverted", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        print("Matrix inverted", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
         t_start = datetime.now()
         
         # initialize the last id in the graph_data
@@ -477,15 +511,6 @@ class Main:
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
         t_mes_start = datetime.now()
-#         for row in self.data_from_db:
-#             # ajouter à data_for_graph
-#             if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
-#                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
-#                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
-#         i_last = len(self.data_for_graph) - 1
-#         print("id_first_displayed_record:",self.id_first_displayed_record,
-#               "id_last_displayed_record:",self.id_last_displayed_record,
-#               "len(data_for_graph):", len(self.data_for_graph))
         
         # Calcul % PAC ON
         count_on = 0
@@ -498,7 +523,9 @@ class Main:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
+            
         print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        
         t_mes_start = datetime.now()
 
         # Affichage des températures actuelles
@@ -522,10 +549,12 @@ class Main:
         t_scale_start = datetime.now()
         if not self.zoom_active:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph_new)
+            
         print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
+        
         t_scale_start = datetime.now()
 ##########################################
-        pdb.set_trace()
+#         pdb.set_trace()
 ##########################################
 
         # initialize date and time
@@ -1418,12 +1447,15 @@ class Main:
         return n
 
     def get_min_max(self, sensor_data):
+        
+        f = False
+        tmp = []
         for l in sensor_data:
-            for x in l:
-                if x == -3333:
-                    l.remove(x)
-        y_min = min(sensor_data)
-        y_max = max(sensor_data)
+            if l != -333:
+                tmp.append(l)
+                
+        y_min = min(tmp)
+        y_max = max(tmp)
         
         return [y_min, y_max]
         
@@ -1431,29 +1463,35 @@ class Main:
     # calcul arrondi pour echelle y
     def get_minmax_echelle_y(self, graph_data):
 
-#         
-#         for index, sensor in enumerate(graph_data):
-#             self.scale_list.append(get_min_max(sensor))
-
-#         if y_max < y_min:
-#             y_max = 20
-#             y_min = 0
-#                 
-#         graduation_step = self.get_y_graduation_step(y_min , y_max)        
-#             
-#                 
-#         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
-#             y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
-#             y_max_ret = (y_max // graduation_step) * graduation_step
-#         else:
-#             y_min_ret = (y_min // graduation_step) * graduation_step  
-#             y_max_ret = (y_max // graduation_step) * graduation_step
-#             
-#         if y_max > 0:
-#             y_max_ret += graduation_step
+        
+        for ix in range(len(graph_data)-2):
+            self.scale_list.append(self.get_min_max(graph_data[ix]))
+            print(self.get_min_max(graph_data[ix]))
+        
+        y_min = 9999999
+        y_max = -9999999
+        for ix, vx in enumerate(self.menu_list):
+            if vx.get() and (ix < 15 or ix > 18):
+                y_min = min(y_min, self.scale_list[ix][0])
+                y_max = max(y_max, self.scale_list[ix][1])
+        
+        if y_max < y_min:
+            y_max = 20
+            y_min = 0
+                
+        graduation_step = self.get_y_graduation_step(y_min , y_max)        
+                
+        if self.menu_list[15].get() or self.menu_list[16].get() or self.menu_list[17].get() or self.menu_list[18].get() :
+            y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
+            y_max_ret = (y_max // graduation_step) * graduation_step
+        else:
+            y_min_ret = (y_min // graduation_step) * graduation_step  
+            y_max_ret = (y_max // graduation_step) * graduation_step
             
-#         return y_min_ret, y_max_ret, graduation_step
-        return 0, 20 ,2
+        if y_max > 0:
+            y_max_ret += graduation_step
+        print(y_min_ret, y_max_ret, graduation_step)
+        return y_min_ret, y_max_ret, graduation_step
 
     def rgb_color(self, rgb):
         """translates an rgb tuple of int to a tkinter friendly color code
