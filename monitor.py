@@ -53,9 +53,9 @@ class Main:
 
         # version infos
         self.VERSION_NAME = "Monitor" 
-        self.VERSION_NO = "1.00.00" 
-        self.VERSION_DATE = "02.05.2020"
-        self.VERSION_DESCRIPTION = "all features are implemented"
+        self.VERSION_NO = "2.00.00" 
+        self.VERSION_DATE = "06.05.2020"
+        self.VERSION_DESCRIPTION = "Improved data processing, much better response times"
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
@@ -94,7 +94,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 240/24
+        self.NBRE_DAYS_ON_GRAPH = 10#1/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -122,7 +122,7 @@ class Main:
                           'On bypass','To home','Fr. rez','Fr. 1er','Fr. home','Fr. bypass',
                           'To boiler','In boiler','Fr. boiler',
                           'Salon','Bureau','Extérieur',
-                          'Pump boiler','Pump home','Boiler on-off','PAC on-off',
+                          'Pump boiler','Pump home','PAC on-off','Boiler on-off',
                           'PAC f-t','Home t-f','Boiler t-f',
                           'PAC toggle','Home toggle','Boiler toggle','Maison toggle','States toggle',
                           'All','Nothing']
@@ -130,11 +130,11 @@ class Main:
         self.label_separator =[2, 8, 11, 14, 18]
         # PAC, Home, Boiler, Afficheurs, States, f-t, toggle
         self.menu_color = [self.rgb_color((190, 118, 112)), self.rgb_color((207, 15, 110)), self.rgb_color((19, 36, 161)), self.rgb_color((199, 155, 117)),
-                           self.rgb_color((200, 200, 200)), self.rgb_color((38, 103, 191)), self.rgb_color((162, 41, 10)), self.rgb_color((124, 165, 155)), self.rgb_color((0, 136, 124)), self.rgb_color((242, 18, 44)),
+                           self.rgb_color((38, 103, 191)), self.rgb_color((162, 41, 10)), self.rgb_color((124, 165, 155)), self.rgb_color((0, 136, 124)), self.rgb_color((242, 18, 44)),
                            self.rgb_color((251, 143, 136)), self.rgb_color((196, 42, 237)), self.rgb_color((174, 175, 150)),
                            self.rgb_color((199, 77, 127)), self.rgb_color((106, 150, 193)), self.rgb_color((32, 110, 224)),
                            self.rgb_color((35, 221, 253)), self.rgb_color((158, 153, 182)), self.rgb_color((255, 0, 0)), self.rgb_color((3, 55, 246)),
-                           self.rgb_color((210, 165, 0)), self.rgb_color((239, 2, 193)), self.rgb_color((63, 54, 80)), self.rgb_color((199, 84, 29))]
+                           self.rgb_color((210, 165, 0)), self.rgb_color((239, 2, 193)), self.rgb_color((63, 54, 80)), self.rgb_color((199, 84, 29)), self.rgb_color((200, 200, 200))]
         
 
         # affichages des valeurs sur le curseur de la souris
@@ -311,15 +311,15 @@ class Main:
         
         # menu time
         timemenu = Menu(menubar, tearoff=0)
-        timemenu.add_radiobutton(label="6 hours", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 0, command = lambda: self.change_days_on_display(0.25))
-        timemenu.add_radiobutton(label="12 hours", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 1, command = lambda: self.change_days_on_display(0.5))
+        timemenu.add_radiobutton(label="6 hours", font = self.FONT_LABEL, value = 0, command = lambda: self.change_days_on_display(0.25))
+        timemenu.add_radiobutton(label="12 hours", font = self.FONT_LABEL, value = 1, command = lambda: self.change_days_on_display(0.5))
         timemenu.add_separator()
-        timemenu.add_radiobutton(label="1 day", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 2, command = lambda: self.change_days_on_display(1))
-        timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 3, command = lambda: self.change_days_on_display(2))
-        timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 4, command = lambda: self.change_days_on_display(4))
-        timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
-        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
-        timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
+        timemenu.add_radiobutton(label="1 day", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(1))
+        timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(2))
+        timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(4))
+        timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(7))
+        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(14))
+        timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(30))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
         # menu courbes de température
@@ -329,57 +329,15 @@ class Main:
                                            command = self.change_curves_on_display)
             if i in self.menu_separator:
                 curvesmenu.add_separator()
-        curvesmenu.add_command(label="22-PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
-        curvesmenu.add_command(label="23-Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
-        curvesmenu.add_command(label="24-Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
-        curvesmenu.add_command(label="25-Afficheurs Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
+        curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
+        curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
+        curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
+        curvesmenu.add_command(label="Afficheurs Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("display"))
+        curvesmenu.add_command(label="States Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
         curvesmenu.add_separator()
-        curvesmenu.add_command(label="26-All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
-        curvesmenu.add_command(label="27-Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
+        curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
+        curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
         menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
-                
-# 
-# 
-#         # afficheurs
-#         curvesmenu.add_checkbutton(label="Salon", font = self.FONT_LABEL, variable = self.display_trace_salon, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Bureau", font = self.FONT_LABEL, variable = self.display_trace_bureau, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Extérieur", font = self.FONT_LABEL, variable = self.display_trace_ext, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="Toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("temp"))
-#         curvesmenu.add_separator()
-#         # PAC
-#         curvesmenu.add_checkbutton(label="From PAC", font = self.FONT_LABEL, variable = self.display_trace_from_pac, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="To PAC", font = self.FONT_LABEL, variable = self.display_trace_to_pac, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From accu", font = self.FONT_LABEL, variable = self.display_trace_from_accu, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="PAC from-to", font = self.FONT_LABEL, variable = self.display_trace_pac_ft, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="PAC toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("pac"))
-#         curvesmenu.add_separator()
-#         # home
-#         curvesmenu.add_checkbutton(label="On bypass", font = self.FONT_LABEL, variable = self.display_trace_on_bypass, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="To home", font = self.FONT_LABEL, variable = self.display_trace_to_home, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From home rez", font = self.FONT_LABEL, variable = self.display_trace_from_home_rez, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From home 1er", font = self.FONT_LABEL, variable = self.display_trace_from_home_1er, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From home", font = self.FONT_LABEL, variable = self.display_trace_from_home, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From bypass", font = self.FONT_LABEL, variable = self.display_trace_from_bypass, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Home from-to", font = self.FONT_LABEL, variable = self.display_trace_home_ft, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="Home toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("home"))
-#         curvesmenu.add_separator()
-#         # boiler
-#         curvesmenu.add_checkbutton(label="To boiler", font = self.FONT_LABEL, variable = self.display_trace_to_boiler, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="In boiler", font = self.FONT_LABEL, variable = self.display_trace_in_boiler, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="From boiler", font = self.FONT_LABEL, variable = self.display_trace_from_boiler, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Boiler from-to", font = self.FONT_LABEL, variable = self.display_trace_boiler_ft, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="Boiler toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("boiler"))
-#         curvesmenu.add_separator()
-#         # states
-#         curvesmenu.add_checkbutton(label="Pump boiler", font = self.FONT_LABEL, variable = self.display_trace_pump_boiler, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Pump home", font = self.FONT_LABEL, variable = self.display_trace_pump_home, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="Boiler on-off", font = self.FONT_LABEL, variable = self.display_trace_boiler_on, command = self.change_curves_on_display)
-#         curvesmenu.add_checkbutton(label="PAC on-off", font = self.FONT_LABEL, variable = self.display_trace_pac_on, command = self.change_curves_on_display)
-#         curvesmenu.add_command(label="States toggle", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("states"))
-#         curvesmenu.add_separator()
-#         curvesmenu.add_command(label="All", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("all"))
-#         curvesmenu.add_command(label="Zero", font = self.FONT_LABEL, command = lambda: self.select_trace_on_display("zero"))
-#         menubar.add_cascade(label="Curves", font = self.FONT_LABEL, menu=curvesmenu)
         
         # menu mesures 
         self.mesuremenu = Menu(menubar, tearoff=0)
@@ -436,6 +394,8 @@ class Main:
 
         # interrompre les répétitions        
         self.kill_repetition_job()
+
+#         pdb.set_trace()
         
         # efface le graphique et affiche working pendant le travail
         self.cnv.delete("all")
@@ -449,15 +409,18 @@ class Main:
         
         # read the database for data's for graph
         t_start = datetime.now()
+        t_start_mes = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
-        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
-        t_start = datetime.now()
+        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        t_start_mes = datetime.now()
 
+        self.data_for_graph_new = []
         # sensors
         for sensor in range(len(self.data_from_db[0])-2):
             colonne = []
             for record in range(len(self.data_from_db)):
                 colonne.append(self.data_from_db[record][sensor])
+            colonne = list(colonne)
             self.data_for_graph_new.append(colonne)
             
         # PAC ft
@@ -467,6 +430,7 @@ class Main:
                 tmp.append(-333)
             else:
                 tmp.append(self.data_for_graph_new[0][ix] - self.data_for_graph_new[1][ix])
+        tmp = list(tmp)
         self.data_for_graph_new.append(tmp)
         
         # Home ft
@@ -476,6 +440,7 @@ class Main:
                 tmp.append(-333)
             else:
                 tmp.append(self.data_for_graph_new[4][ix] - self.data_for_graph_new[7][ix])
+        tmp = list(tmp)
         self.data_for_graph_new.append(tmp)
         
         # Boiler ft
@@ -485,6 +450,7 @@ class Main:
                 tmp.append(-333)
             else:
                 tmp.append(self.data_for_graph_new[11][ix] - self.data_for_graph_new[9][ix])
+        tmp = list(tmp)
         self.data_for_graph_new.append(tmp)
         
         # time and id
@@ -492,11 +458,11 @@ class Main:
             colonne = []
             for record in range(len(self.data_from_db)):
                 colonne.append(self.data_from_db[record][sensor])
+            colonne = list(colonne)
             self.data_for_graph_new.append(colonne)
             
-        print("Matrix inverted", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
-        t_start = datetime.now()
-        
+        self.data_for_graph_new = list(self.data_for_graph_new)
+
         # initialize the last id in the graph_data
         self.id_first_displayed_record = min(self.data_for_graph_new[23])
         self.id_last_displayed_record = max(self.data_for_graph_new[23])
@@ -505,13 +471,19 @@ class Main:
         self.id_last_fromdb_record = max(self.data_for_graph_new[23])
         
         self.nbre_records_in_data_from_db = len(self.data_for_graph_new[23])
+            
+        print("Data preparation ok", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        print("Data total", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s for",
+              str(self.NBRE_DAYS_ON_GRAPH), "days", str(self.NBRE_DAYS_ON_GRAPH*24*60), "records")
         
         self.refresh_display()
         
 
     # Rafraichissement des valeurs toutes les minutes (l'intevalle peut être égal ou supérieur à celui entre deux acquisitions)
     def refresh_display(self):
+        
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
+        t_start_mes = datetime.now()
         
         # affichage des passes
         self.n_passe += 1
@@ -520,7 +492,6 @@ class Main:
         # initialisation des variables internes
 #         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
-        t_mes_start = datetime.now()
         
         # Calcul % PAC ON
         count_on = 0
@@ -533,10 +504,6 @@ class Main:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
-            
-        print("\ndata is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        
-        t_mes_start = datetime.now()
 
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
@@ -556,13 +523,11 @@ class Main:
         self.val_pac.set("".join([str(int(self.pac_on_off)), " %"]))
 
         # echelles min et max pour les ordonnées
-        t_scale_start = datetime.now()
         if not self.zoom_active:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph_new)
             
-        print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
-        
-        t_scale_start = datetime.now()
+        print("\nGraph scale ok", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        t_start_mes = datetime.now()
 
         # initialize date and time
         datetime_start_plot = min(self.data_for_graph_new[22])
@@ -601,9 +566,6 @@ class Main:
 
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
-
-        print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
 
         # PAC label only if PAC or boiler is displayed
         if self.menu_list[15].get() or self.menu_list[16].get() or self.menu_list[17].get() or self.menu_list[18].get() :
@@ -671,316 +633,139 @@ class Main:
 #                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
 #         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
             
-        print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+        print("Preparation axes and grids", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        t_start_mes = datetime.now()
         
         x_dat = []
+        point_size = 3
         for i in range(len(self.data_for_graph_new[0])):
             x_dat.append(i * x_data_to_pix + self.V_PADX)
-#             print(i, i * x_data_to_pix + self.V_PADX)
-        t_mes_start = datetime.now()
         
+        pump_line_width = 5#(self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
+        pixels_height_for_states = 25
+        nbre_pixels_entre_dots = 3
+        
+        # temperatures
         for i_trace, trace in enumerate(self.data_for_graph_new):
             if i_trace < 15:
                 if self.menu_list[i_trace].get():
-#                     print(len(trace))
                     for i_point in range(len(trace)):
                         if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0:
-                            if abs(x_dat[i_point] - x_old) > 2:
+                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
                                 x_new = x_dat[i_point]
                                 y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
                                 self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
                                                          width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+                                if (x_dat[i_point] - x_old) > 10:
+                                    self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
                                 x_old = x_dat[i_point]
                                 y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
                         elif i_point == 0:
                             x_old = x_dat[i_point]
                             y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                            
-#                             pdb.set_trace()
-#         y = 0
-#         # draw the curves
-#         for i, mes in enumerate(self.data_for_graph_new):
-#             # but not for the first pass because old value are not correct
-#             if i > 0: 
-#                 x = i * x_data_to_pix + self.V_PADX
-# #                 print(x, old_x, x-old_x)
-#                 if (x - old_x) > 3:
-#                    
-#                     # afficheurs
-#                     if self.display_trace_salon.get() and mes[12] != -333:
-#                         t_salon = mes[12]
-#                         y = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_salon, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_SALON)
-#                         old_y_salon = y
-#                     if self.display_trace_bureau.get() and mes[13] != -333:
-#                         t_bureau = mes[13]
-#                         y = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_bureau, x, y + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.COLOR_BUREAU)
-#                         old_y_bureau = y
-#                     if self.display_trace_ext.get() and mes[14] != -333:
-#                         t_ext = mes[14]
-#                         y = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_ext, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_EXT)
-#                         old_y_ext = y
-# 
-#                     # PAC
-#                     if self.display_trace_from_pac.get() and mes[0] != -333:
-#                         t_from_pac = mes[0]
-#                         y = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_PAC)
-#                         old_y_from_pac = y
-#                         
-#                     if self.display_trace_to_pac.get() and mes[1] != -333:
-#                         t_to_pac = mes[1]
-#                         y = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_to_pac, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_PAC)
-#                         old_y_to_pac = y
-#              
-#                     if self.display_trace_from_accu.get() and mes[2] != -333:
-#                         t_from_accu = mes[2]
-#                         y = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_accu, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_ACCU)
-#                         old_y_from_accu = y
-#                         
-#                     if self.display_trace_pac_ft.get() and mes[0] != -333 and mes[1] != -333:
-#                         t_pac_ft = mes[0] - mes[1]
-#                         y = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_pac_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
-#                         old_y_pac_ft = y
-#                         
-#                     # Home
-#                     if self.display_trace_on_bypass.get() and mes[3] != -333:
-#                         t_on_bypass = mes[3]
-#                         y = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_on_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_ON_BYPASS)
-#                         old_y_on_bypass = y
-#                         
-#                     if self.display_trace_to_home.get() and mes[4] != -333:
-#                         t_to_home = mes[4]
-#                         y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_to_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_HOME)
-#                         old_y_to_home = y
-#                         
-#                     if self.display_trace_from_home_rez.get() and mes[5] != -333:
-#                         t_from_home_rez = mes[5]
-#                         y = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_home_rez, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_REZ)
-#                         old_y_from_home_rez = y
-#                         
-#                     if self.display_trace_from_home_1er.get() and mes[6] != -333:
-#                         t_from_home_1er = mes[6]
-#                         y = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_home_1er, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_1ER)
-#                         old_y_from_home_1er = y
-#                         
-#                     if self.display_trace_from_home.get() and mes[7] != -333:
-#                         t_from_home = mes[7]
-#                         y = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_home, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_HOME)
-#                         old_y_from_home = y
-#                         
-#                     if self.display_trace_from_bypass.get() and mes[8] != -333:
-#                         t_from_bypass = mes[8]
-#                         y = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_bypass, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BYPASS)
-#                         old_y_from_bypass = y
-#                         
-#                     if self.display_trace_home_ft.get() and mes[4] != -333 and mes[7] != -333:
-#                         t_to_home = mes[4] - mes[7]
-#                         y = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_home_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_HOME)
-#                         old_y_home_ft = y
-# 
-#                     # Boiler
-#                     if self.display_trace_to_boiler.get() and mes[9] != -333:
-#                         t_to_boiler = mes[9]
-#                         y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_to_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_TO_BOILER)
-#                         old_y_to_boiler = y
-#                         
-#                     if self.display_trace_in_boiler.get() and mes[10] != -333:
-#                         t_in_boiler = mes[10]
-#                         y = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_in_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_IN_BOILER)
-#                         old_y_in_boiler = y
-#                         
-#                     if self.display_trace_from_boiler.get() and mes[11] != -333:
-#                         t_from_boiler = mes[11]
-#                         y = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_from_boiler, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FROM_BOILER)
-#                         old_y_from_boiler = y
-#                         
-#                     if self.display_trace_boiler_ft.get() and mes[9] != -333 and mes[11] != -333:
-#                         t_to_boiler = mes[11] - mes[9]
-#                         y = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-#                         self.cnv.create_line(old_x, old_y_boiler_ft, x, y + self.TRACE_WIDTH, width=self.TRACE_WIDTH, fill=self.COLOR_FT_BOILER)
-#                         old_y_boiler_ft = y
-#                         
-#                     # pumps
-#                     # épaisseur du trait = pixels / minutes et un peu plus
-#                     pump_line_width = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
-#                     if self.display_trace_pump_boiler.get() and mes[15] != -1:
-#                         s_pump_boiler = mes[15]
-#                         y = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-#                         self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_BOILER)
-#                          
-#                     if self.display_trace_pump_home.get() and mes[16] != -1:
-#                         s_pump_home = mes[16]
-#                         y = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-#                         self.cnv.create_line(x, self.Y_MIN, x, y, width=pump_line_width, fill=self.COLOR_PUMP_HOME)
-#                     
-#                     # redraw x-axis
-#                     self.cnv.create_line(self.X_MIN, self.Y_MIN, self.X_MAX + self.V_PADX / 2, self.Y_MIN, arrow = tk.LAST) # axe des abcisses
-#                     # states     
-#                     if self.display_trace_pac_on.get() and mes[17] != -1:
-#                         s_pac_onoff = mes[17]
-#                         if s_pac_onoff == 1:
-#                             self.cnv.create_line(old_x, self.Y_MIN + 2.5, x, self.Y_MIN + 2.5 , width=5, fill=self.COLOR_PAC_ON_OFF)
-#                          
-#                     if self.display_trace_boiler_on.get() and mes[17] != -1:
-#                         s_boiler_onoff = mes[18]
-#                         if s_boiler_onoff == 1:
-#                             self.cnv.create_line(old_x, self.Y_MIN + 8, x, self.Y_MIN + 8 , width=5, fill=self.COLOR_BOILER_ON_OFF)
-#                     
-#                     old_x = x
-# 
-#             else: # this is the first pass also initialize the old values
-#                 
-#                 old_x = i * x_data_to_pix + self.V_PADX
-#                 
-#                 # afficheurs
-#                 if self.display_trace_salon.get():
-#                     t_salon = mes[12]
-#                     old_y_salon = y_val_to_pix * (t_salon - self.echelle_y_min) + self.Y_MIN
-#                 
-#                 if self.display_trace_bureau.get():
-#                     t_bureau = mes[13]
-#                     old_y_bureau = y_val_to_pix * (t_bureau - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_ext.get():
-#                     t_ext = mes[14]
-#                     old_y_ext = y_val_to_pix * (t_ext - self.echelle_y_min) + self.Y_MIN
-# 
-#                 # PAC
-#                 if self.display_trace_from_pac.get():
-#                     t_from_pac = mes[0]
-#                     old_y_from_pac = y_val_to_pix * (t_from_pac - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_to_pac.get():
-#                     t_to_pac = mes[1]
-#                     old_y_to_pac = y_val_to_pix * (t_to_pac - self.echelle_y_min) + self.Y_MIN
-#  
-#                 if self.display_trace_from_accu.get():
-#                     t_from_accu = mes[2]
-#                     old_y_from_accu = y_val_to_pix * (t_from_accu - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_pac_ft.get():
-#                     t_pac_ft = mes[0] - mes[1]
-#                     old_y_pac_ft = y_val_to_pix * (t_pac_ft - self.echelle_y_min) + self.Y_MIN
-#          
-#                 # home
-#                 if self.display_trace_on_bypass.get():
-#                     t_on_bypass = mes[3]
-#                     old_y_on_bypass = y_val_to_pix * (t_on_bypass - self.echelle_y_min) + self.Y_MIN
-#                     
-#                 if self.display_trace_to_home.get():
-#                     t_to_home = mes[4]
-#                     old_y_to_home = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-#                     
-#                 if self.display_trace_from_home_rez.get():
-#                     t_from_home_rez = mes[5]
-#                     old_y_from_home_rez = y_val_to_pix * (t_from_home_rez - self.echelle_y_min) + self.Y_MIN
-#                     
-#                 if self.display_trace_from_home_1er.get():
-#                     t_from_home_1er = mes[6]
-#                     old_y_from_home_1er = y_val_to_pix * (t_from_home_1er - self.echelle_y_min) + self.Y_MIN
-#                     
-#                 if self.display_trace_from_home.get():
-#                     t_from_home = mes[7]
-#                     old_y_from_home = y_val_to_pix * (t_from_home - self.echelle_y_min) + self.Y_MIN
-#                     
-#                 if self.display_trace_from_bypass.get():
-#                     t_from_bypass = mes[8]
-#                     old_y_from_bypass = y_val_to_pix * (t_from_bypass - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_home_ft.get():
-#                     t_to_home = mes[4] - mes[7]
-#                     old_y_home_ft = y_val_to_pix * (t_to_home - self.echelle_y_min) + self.Y_MIN
-# 
-#                 # boiler
-#                 if self.display_trace_to_boiler.get():
-#                     t_to_boiler = mes[9]
-#                     old_y_to_boiler = y_val_to_pix * (t_to_boiler - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_in_boiler.get():
-#                     t_in_boiler = mes[10]
-#                     old_y_in_boiler = y_val_to_pix * (t_in_boiler - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_from_boiler.get():
-#                     t_from_boiler = mes[11]
-#                     old_y_from_boiler = y_val_to_pix * (t_from_boiler - self.echelle_y_min) + self.Y_MIN
-# 
-#                 if self.display_trace_boiler_ft.get():
-#                     t_boiler_ft = mes[11] - mes[9]
-#                     old_y_boiler_ft = y_val_to_pix * (t_boiler_ft - self.echelle_y_min) + self.Y_MIN
-#                 
-#                 # states 
-#                 if self.display_trace_pump_boiler.get() and mes[15] != -1:
-#                     s_pump_boiler = mes[15]
-#                     old_y_pump_boiler = self.Y_MIN - self.pixels_heigt_for_states * s_pump_boiler #self.graduation_step * y_val_to_pix * s_pump_boiler * 0.5
-#                      
-#                 if self.display_trace_pump_home.get() and mes[16] != -1:
-#                     s_pump_home = mes[16]
-#                     old_y_pump_home = self.Y_MIN + - self.pixels_heigt_for_states * s_pump_home #self.graduation_step * y_val_to_pix * s_pump_home * 0.5
-#                     
-#                 old_x = old_x
             
-        self.t_elapsed = datetime.now() - t_start
-        secondes_decimales_str = str(self.t_elapsed).split(".")[1]
-        secondes_decimales_float = float(secondes_decimales_str)/1E6
-        t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
-        t_pause = self.t_pause - t_elapsed
+            # pumps boiler and home
+            elif i_trace >= 15 and i_trace <= 16:
+                if self.menu_list[i_trace].get():
+                    for i_point in range(len(trace)):
+                        if trace[i_point] != -1 and trace[i_point-1] != -1 and i_point > 0:
+                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+                                x_new = x_dat[i_point]
+                                y_new = self.Y_MIN - pixels_height_for_states * trace[i_point]
+                                self.cnv.create_line(x_new, self.Y_MIN, x_new, y_new, width =pump_line_width, fill = self.menu_color[i_trace])
+                        elif i_point == 0:
+                            x_old = x_dat[i_point]
+                            y_old = self.Y_MIN
+                             
+            # PAC on-off
+            elif i_trace == 17 :
+                if self.menu_list[i_trace].get():
+                    for i_point in range(len(trace)):
+                        if trace[i_point] == 1 and i_point > 0:
+                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+                                x_new = x_dat[i_point]
+                                self.cnv.create_line(x_old, self.Y_MIN + 2.5, x_new, self.Y_MIN + 2.5 , width =pump_line_width, fill = self.menu_color[i_trace])
+                        else:
+                            x_old = x_dat[i_point]
+
+
+            # Boiler on-off
+            elif i_trace == 18 :
+                if self.menu_list[i_trace].get():
+                    for i_point in range(len(trace)):
+                        if (trace[i_point] == 1 and i_point > 0):
+                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+                                x_new = x_dat[i_point]
+                                self.cnv.create_line(x_old, self.Y_MIN + 8, x_new, self.Y_MIN + 8 , width =pump_line_width, fill = self.menu_color[i_trace])
+                        else:
+                            x_old = x_dat[i_point]
+                            
+                
         
-        print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
+        print("Plotted curves", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        t_start_mes = datetime.now()
         
         # read the database for data's to append to the graph
         # but stop the changes in the daabase while zoom is active
         if not self.zoom_active:
             
             # read the new(s) record(s) in the database
-            self.read_data = self.mysql_logger.get_temp_to_complete_graph(self.id_last_fromdb_record) # id's bigger than self.id_last_fromdb_record
-            n_row = len(self.read_data)
+            read_data = self.mysql_logger.get_temp_to_complete_graph(self.id_last_fromdb_record)
+            read_data = list(read_data)
+            # id's bigger than self.id_last_fromdb_record
+            n_row = len(read_data)
             n_removed = 0
 
-            p_str = "".join(["passe:", str(self.n_passe)])
-            p_str += "".join([" n_row:", str(n_row), " removed:"])
-
-            # remove the old(s) record(s) in the data_from_db list
-##########################################
-#             pdb.set_trace()
-##########################################
-            while n_removed < n_row:
-                record_to_remove = self.data_from_db[0]
-                self.data_from_db.remove(record_to_remove)
-                n_removed += 1
-                p_str += "".join([str(record_to_remove[0]), "/"])
-                
-            # and add the now(s) record(s) in the data_from_db list
-            p_str += " added:"
-            for row in self.read_data:
-                self.data_from_db.append(row)
-                p_str += "".join([str(row[0]), "/"])
+            p_str = "".join(["passe:", str(self.n_passe), " n_row:", str(n_row)])
             
-            # adapt the id of the last records
-            self.id_last_fromdb_record = max(self.data_for_graph_new[23])
-            self.id_last_displayed_record = self.id_last_fromdb_record
+            if n_row > 0:
+
+                # remove the old(s) record(s) in the data_from_db list
+                while n_removed < n_row:
+                    for i_sensor in range(len(self.data_for_graph_new)):
+                        del self.data_for_graph_new[i_sensor][0]
+                    n_removed += 1
+                    
+                # and add the now(s) record(s) in the data_from_db list
+                for row in read_data:
+                    for i_field, field in enumerate(row):
+                        if i_field < 19:
+                            self.data_for_graph_new[i_field].append(field)
+
+                    # PAC ft
+                    if row[0] == -333 or row[1] == -333:
+                        tmp = -333
+                    else:
+                        tmp = row[0] - row[1]
+                    self.data_for_graph_new[19].append(tmp)
+                
+                    # Home ft
+                    if row[4] == -333 or row[7] == -333:
+                        tmp = -333
+                    else:
+                        tmp = row[4] - row[7]
+                    self.data_for_graph_new[20].append(tmp)
+                
+                    # Boiler ft
+                    if row[11] == -333 or row[9] == -333:
+                        tmp = -333
+                    else:
+                        tmp = row[11] - row[9]
+                    self.data_for_graph_new[21].append(tmp)
+            
+                # time and id
+                self.data_for_graph_new[22].append(row[19])
+                self.data_for_graph_new[23].append(row[20])
+                    
+                # adapt the id of the last records
+                self.id_last_fromdb_record = max(self.data_for_graph_new[23])
+                self.id_last_displayed_record = self.id_last_fromdb_record
             
             p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
-            p_str += "".join([" t_pause:", str(t_pause), "ms t_elapsed:", str(t_elapsed), "ms"])
+#             p_str += "".join([" t_pause:", "{0:.3f}".format(t_pause/1000), "s t_elapsed:", "{0:.3f}".format(t_elapsed/1000), "s"])
             
             # if more then one record print a message
-            if n_row > 1 : print(p_str)
+            if n_row > 0 : print(p_str)
             
             # recreate cursors if exists
             pixels_pro_minute = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60
@@ -997,12 +782,17 @@ class Main:
             self.mouse_cursors_y.clear()
             for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
                 self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+                            
+            self.t_elapsed = datetime.now() - t_start
+            secondes_decimales_str = str(self.t_elapsed).split(".")[1]
+            secondes_decimales_float = float(secondes_decimales_str)/1E6
+            t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
+            t_pause = self.t_pause - t_elapsed
+            
+        print("Pass total time", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
 
         # pause the program for a while (t_pause) and after that restat it
-        print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
-#         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
-#                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
-#         print("waiting for next display update", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
+        print("".join(["Pass: ", str(self.n_passe), " - new records: ", str(n_row)]))
         self._job = self.tk_root.after(t_pause, self.refresh_display)
 
     def set_x_scale_change(self):
@@ -1157,83 +947,41 @@ class Main:
     # affiche les curves sélectionnées par le menu 'curvesmenu'
     def select_trace_on_display(self, who):
         
-        if who == "temp": 
-            self.display_trace_salon.set(not self.display_trace_salon.get())
-            self.display_trace_bureau.set(not self.display_trace_bureau.get())
-            self.display_trace_ext.set(not self.display_trace_ext.get())
-        
-        if who == "pac": 
-            self.display_trace_from_pac.set(not self.display_trace_from_pac.get())
-            self.display_trace_to_pac.set(not self.display_trace_to_pac.get())
-            self.display_trace_from_accu.set(not self.display_trace_from_accu.get())
-            self.display_trace_pac_ft.set(not self.display_trace_pac_ft.get())
+        if who == "pac":
+            self.menu_list[0].set(not self.menu_list[0].get())
+            self.menu_list[1].set(not self.menu_list[1].get())
+            self.menu_list[2].set(not self.menu_list[2].get())
             
         if who == "home": 
-            self.display_trace_on_bypass.set(not self.display_trace_on_bypass.get())
-            self.display_trace_to_home.set(not self.display_trace_to_home.get())
-            self.display_trace_from_home_rez.set(not self.display_trace_from_home_rez.get())
-            self.display_trace_from_home_1er.set(not self.display_trace_from_home_1er.get())
-            self.display_trace_from_home.set(not self.display_trace_from_home.get())
-            self.display_trace_from_bypass.set(not self.display_trace_from_bypass.get())
-            self.display_trace_home_ft.set(not self.display_trace_home_ft.get())
+            self.menu_list[3].set(not self.menu_list[3].get())
+            self.menu_list[4].set(not self.menu_list[4].get())
+            self.menu_list[5].set(not self.menu_list[5].get())
+            self.menu_list[6].set(not self.menu_list[6].get())
+            self.menu_list[7].set(not self.menu_list[7].get())
             
         if who == "boiler": 
-            self.display_trace_to_boiler.set(not self.display_trace_to_boiler.get())
-            self.display_trace_in_boiler.set(not self.display_trace_in_boiler.get())
-            self.display_trace_from_boiler.set(not self.display_trace_from_boiler.get())
-            self.display_trace_boiler_ft.set(not self.display_trace_boiler_ft.get())
+            self.menu_list[9].set(not self.menu_list[9].get())
+            self.menu_list[10].set(not self.menu_list[10].get())
+            self.menu_list[11].set(not self.menu_list[11].get())
+        
+        if who == "display": 
+            self.menu_list[12].set(not self.menu_list[12].get())
+            self.menu_list[13].set(not self.menu_list[13].get())
+            self.menu_list[14].set(not self.menu_list[14].get())
 
         if who == "states":
-            self.display_trace_pump_boiler.set(not self.display_trace_pump_boiler.get())
-            self.display_trace_pump_home.set(not self.display_trace_pump_home.get()) 
-            self.display_trace_boiler_on.set(not self.display_trace_boiler_on.get()) 
-            self.display_trace_pac_on.set(not self.display_trace_pac_on.get()) 
+            self.menu_list[15].set(not self.menu_list[15].get())
+            self.menu_list[16].set(not self.menu_list[16].get())
+            self.menu_list[17].set(not self.menu_list[17].get())
+            self.menu_list[18].set(not self.menu_list[18].get())
             
-        if who == "zero": 
-            self.display_trace_salon.set(False)
-            self.display_trace_bureau.set(False)
-            self.display_trace_ext.set(False)
-        
-            self.display_trace_from_pac.set(False)
-            self.display_trace_to_pac.set(False)
-            self.display_trace_from_accu.set(False)
-            self.display_trace_pac_ft.set(False)
-            
-            self.display_trace_on_bypass.set(False)
-            self.display_trace_to_home.set(False)
-            self.display_trace_from_home_rez.set(False)
-            self.display_trace_from_home_1er.set(False)
-            self.display_trace_from_home.set(False)
-            self.display_trace_from_bypass.set(False)
-            self.display_trace_home_ft.set(False)
-            
-            self.display_trace_to_boiler.set(False)
-            self.display_trace_in_boiler.set(False)
-            self.display_trace_from_boiler.set(False)
-            self.display_trace_boiler_ft.set(False)
-            
+        if who == "zero":
+            for ix in range(22):
+                self.menu_list[ix].set(False)
+           
         if who == "all": 
-            self.display_trace_salon.set(True)
-            self.display_trace_bureau.set(True)
-            self.display_trace_ext.set(True)
-        
-            self.display_trace_from_pac.set(True)
-            self.display_trace_to_pac.set(True)
-            self.display_trace_from_accu.set(True)
-            self.display_trace_pac_ft.set(True)
-            
-            self.display_trace_on_bypass.set(True)
-            self.display_trace_to_home.set(True)
-            self.display_trace_from_home_rez.set(True)
-            self.display_trace_from_home_1er.set(True)
-            self.display_trace_from_home.set(True)
-            self.display_trace_from_bypass.set(True)
-            self.display_trace_home_ft.set(True)
-            
-            self.display_trace_to_boiler.set(True)
-            self.display_trace_in_boiler.set(True)
-            self.display_trace_from_boiler.set(True)
-            self.display_trace_boiler_ft.set(True)
+            for ix in range(22):
+                self.menu_list[ix].set(True)
         
         self.change_curves_on_display()
 
