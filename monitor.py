@@ -59,6 +59,8 @@ class Main:
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
+        self.debug = False
+        
         # variables de controle
         self._job = None
         self.t_pause = 60000 # 60 secondes 
@@ -579,11 +581,6 @@ class Main:
         t_mes_start = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
         self.data_from_db = list(self.data_from_db)
-
-###############################
-        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_start = datetime.now()
-###############################
         
         # initialize the last id in the graph_data
         self.id_first_displayed_record = self.data_from_db[0][20]
@@ -593,13 +590,20 @@ class Main:
         self.id_last_fromdb_record = self.data_from_db[-1][20]
         
         self.nbre_records_in_data_from_db = len(self.data_from_db)
+
+        if self.debug:
+            print("Loaded data", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s\n")
+            t_start = datetime.now()
         
         self.refresh_display()
         
 
     # Rafraichissement des valeurs toutes les minutes (l'intevalle peut être égal ou supérieur à celui entre deux acquisitions)
     def refresh_display(self):
+        
+        n_row = 0
         t_start = datetime.now() # par défault le graphique se termine à l'instant présent
+        t_mes_start = datetime.now()
         
         # affichage des passes
         self.n_passe += 1
@@ -608,16 +612,12 @@ class Main:
         # initialisation des variables internes
         self.data_for_graph = []
         # créer la list data_for_graph -> parcourir tous les data's de data_from_db
-        t_mes_start = datetime.now()
         for row in self.data_from_db:
             # ajouter à data_for_graph
             if row[20] >= self.id_first_displayed_record and row[20] <= self.id_last_displayed_record:
                 self.data_for_graph.append([row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10],
                                        row[11], row[12], row[13], row[14], row[15], row[16], row[17], row[18], row[19], row[20]])
         i_last = len(self.data_for_graph) - 1
-#         print("id_first_displayed_record:",self.id_first_displayed_record,
-#               "id_last_displayed_record:",self.id_last_displayed_record,
-#               "len(data_for_graph):", len(self.data_for_graph))
         
         # Calcul % PAC ON
         count_on = 0
@@ -630,10 +630,10 @@ class Main:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
-###############################
-        print("data is ready", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
-###############################
+            
+        if self.debug:
+            print("data prepared", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+            t_mes_start = datetime.now()
             
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
@@ -654,10 +654,10 @@ class Main:
         t_scale_start = datetime.now()
         if not self.zoom_active:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph)
-###############################
-        print("get scale", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
-###############################
+            
+        if self.debug:
+            print("Calculated scales", "{0:.3f}".format((datetime.now() - t_scale_start).total_seconds()),"s")
+            t_mes_start = datetime.now()
 
         # initialize date and time
         datetime_start_plot = self.data_for_graph[0][19]
@@ -696,11 +696,6 @@ class Main:
 
         # get the correlation between pixels and celsius
         y_val_to_pix = (self.Y_MAX - self.Y_MIN) / (self.echelle_y_max - self.echelle_y_min)
-        
-###############################
-        print("display is updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
-###############################
 
         # PAC label only if PAC or boiler is displayed
         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
@@ -768,18 +763,12 @@ class Main:
                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
         
-###############################
-        print("axes and grids are updated", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
-###############################
-        
         y = 0
         # draw the curves
         for i, mes in enumerate(self.data_for_graph):
             # but not for the first pass because old value are not correct
             if i > 0: 
                 x = i * x_data_to_pix + self.V_PADX
-#                 print(x, old_x, x-old_x)
                 if (x - old_x) > 3:
                    
                     # afficheurs
@@ -1017,10 +1006,9 @@ class Main:
         t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
         t_pause = self.t_pause - t_elapsed
         
-###############################
-        print("curves are created", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
-        t_mes_start = datetime.now()
-###############################
+        if self.debug:
+            print("Drawn graphics", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
+            t_mes_start = datetime.now()
         
         # read the database for data's to append to the graph
         # but stop the changes in the daabase while zoom is active
@@ -1031,18 +1019,12 @@ class Main:
             n_row = len(self.read_data)
             n_removed = 0
 
-            p_str = "".join(["passe:", str(self.n_passe)])
-            p_str += "".join([" n_row:", str(n_row), " removed:"])
-
             # remove the old(s) record(s) in the data_from_db list
             while n_removed < n_row:
                 record_to_remove = self.data_from_db[0]
                 self.data_from_db.remove(record_to_remove)
                 n_removed += 1
-                p_str += "".join([str(record_to_remove[0]), "/"])
                 
-            # and add the now(s) record(s) in the data_from_db list
-            p_str += " added:"
             for row in self.read_data:
                 self.data_from_db.append(row)
                 p_str += "".join([str(row[0]), "/"])
@@ -1050,12 +1032,6 @@ class Main:
             # adapt the id of the last records
             self.id_last_fromdb_record = self.data_from_db[-1][20]
             self.id_last_displayed_record = self.id_last_fromdb_record
-            
-            p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
-            p_str += "".join([" t_pause:", str(t_pause), "ms t_elapsed:", str(t_elapsed), "ms"])
-            
-            # if more then one record print a message
-            if n_row > 1 : print(p_str)
             
             # recreate cursors if exists
             pixels_pro_minute = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60
@@ -1073,13 +1049,8 @@ class Main:
             for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
                 self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
-        # pause the program for a while (t_pause) and after that restat it
-###############################
-        print("total refresg_display proc", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
-###############################
-#         print("".join(["Timer restarted -> Passe:", str(self.n_passe), " - t_elapsed:", str(t_elapsed),
-#                        "ms - t_pause:", "{0:.2f}".format(t_pause/1000), "s"]))
-#         print("waiting for next display update", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s\n")
+        if self.debug:
+            print("Total time for the pass", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"sec", "nouveaux enregistrements", str(n_row), "\n")
         self._job = self.tk_root.after(t_pause, self.refresh_display)
 
     def set_x_scale_change(self):
