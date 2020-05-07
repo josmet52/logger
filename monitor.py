@@ -59,6 +59,8 @@ class Main:
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
+        self.DEBUG = True
+        
         # variables de controle
         self._job = None
         self.t_pause = 60000 # 60 secondes 
@@ -80,9 +82,9 @@ class Main:
         self.win_width =  int(self.win_width_th * win_reduction_factor)
         self.win_height = int(self.win_height_th * win_reduction_factor)
 
-        self.win_pos_x = (self.win_width_th - self.win_width) / 2
+        self.win_pos_x = (self.win_width_th - self.win_width) #/ 2
         self.win_pos_y = (self.win_height_th - self.win_height) / 20
-        print("win size :" , self.win_width, "x", self.win_height)
+        print("Window size" , self.win_width, "x", self.win_height)
         
         # main windows
         self.tk_root = tk_root
@@ -94,20 +96,20 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 10#1/24
+        self.NBRE_DAYS_ON_GRAPH = 10#.5/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
-        self.nbre_days_on_display = IntVar(self.tk_root)
-        if self.NBRE_DAYS_ON_GRAPH == 0.25: self.nbre_days_on_display.set(0)
-        elif self.NBRE_DAYS_ON_GRAPH == 0.5: self.nbre_days_on_display.set(1)
-        elif self.NBRE_DAYS_ON_GRAPH == 1: self.nbre_days_on_display.set(2)
-        elif self.NBRE_DAYS_ON_GRAPH == 2: self.nbre_days_on_display.set(3)
-        elif self.NBRE_DAYS_ON_GRAPH == 4: self.nbre_days_on_display.set(4)
-        elif self.NBRE_DAYS_ON_GRAPH == 7: self.nbre_days_on_display.set(5)
-        elif self.NBRE_DAYS_ON_GRAPH == 14: self.nbre_days_on_display.set(6)
-        elif self.NBRE_DAYS_ON_GRAPH == 30: self.nbre_days_on_display.set(7)
-        else: self.nbre_days_on_display.set(2)
+#         self.nbre_days_on_display = IntVar(self.tk_root)
+#         if self.NBRE_DAYS_ON_GRAPH == 0.25: self.nbre_days_on_display.set(0)
+#         elif self.NBRE_DAYS_ON_GRAPH == 0.5: self.nbre_days_on_display.set(1)
+#         elif self.NBRE_DAYS_ON_GRAPH == 1: self.nbre_days_on_display.set(2)
+#         elif self.NBRE_DAYS_ON_GRAPH == 2: self.nbre_days_on_display.set(3)
+#         elif self.NBRE_DAYS_ON_GRAPH == 4: self.nbre_days_on_display.set(4)
+#         elif self.NBRE_DAYS_ON_GRAPH == 7: self.nbre_days_on_display.set(5)
+#         elif self.NBRE_DAYS_ON_GRAPH == 14: self.nbre_days_on_display.set(6)
+#         elif self.NBRE_DAYS_ON_GRAPH == 30: self.nbre_days_on_display.set(7)
+#         else: self.nbre_days_on_display.set(2)
 
         self.TRACE_WIDTH = 2
 
@@ -318,7 +320,7 @@ class Main:
         timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(2))
         timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(4))
         timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(7))
-        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(14))
+        timemenu.add_radiobutton(label="10 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(10))
         timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, command = lambda: self.change_days_on_display(30))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
@@ -411,7 +413,8 @@ class Main:
         t_start = datetime.now()
         t_start_mes = datetime.now()
         self.data_from_db = self.mysql_logger.get_temp_for_graph(self.nbre_hours_on_graph) # nbre_hours_on_graph
-        print("\nLoading data", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        if self.DEBUG:
+            print("Loaded data", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
         t_start_mes = datetime.now()
 
         self.data_for_graph_new = []
@@ -472,9 +475,10 @@ class Main:
         
         self.nbre_records_in_data_from_db = len(self.data_for_graph_new[23])
             
-        print("Data preparation ok", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
-        print("Data total", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s for",
-              str(self.NBRE_DAYS_ON_GRAPH), "days", str(self.NBRE_DAYS_ON_GRAPH*24*60), "records")
+        if self.DEBUG:
+            print("Data preparation", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+            print("Total for initialization", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s for",
+              str(self.NBRE_DAYS_ON_GRAPH), "days and", str(self.NBRE_DAYS_ON_GRAPH*24*60), "records")
         
         self.refresh_display()
         
@@ -487,7 +491,17 @@ class Main:
         
         # affichage des passes
         self.n_passe += 1
-        self.tk_root.title("".join(["Monitor passe ", str(self.n_passe)])) #, " t=", "{0:.2f}".format(self.t_elapsed.total_seconds()), "[s])"])) 
+        self.tk_root.title("".join(["Monitor passe ", str(self.n_passe)])) #, " t=", "{0:.2f}".format(self.t_elapsed.total_seconds()), "[s])"]))
+        
+        # dictionnaire qui met en relation l'index du record avec son id
+        # usage : record_index = record_dict[record_id]
+        record_dict = {}
+        record_id = 0
+        record_index = 0
+        for record_id, record_index in enumerate(self.data_for_graph_new[23]):
+#             print(record_index, record_id)
+            record_dict[record_index] = record_id
+        
         
         # initialisation des variables internes
 #         self.data_for_graph = []
@@ -496,22 +510,23 @@ class Main:
         # Calcul % PAC ON
         count_on = 0
         count_tot = 0
-        for p in self.data_for_graph_new[17]:
-            count_tot += 1
-            if p > 0:
-                count_on += 1
+        for index_pac, pac_onoff in enumerate(self.data_for_graph_new[17]):
+            if self.data_for_graph_new[23][index_pac]  >= self.id_first_displayed_record \
+               and self.data_for_graph_new[23][index_pac] <= self.id_last_displayed_record: 
+                count_tot += 1
+                if pac_onoff > 0:
+                    count_on += 1
         if count_tot > 0:
             self.pac_on_off = count_on / count_tot * 100
         else:
             self.pac_on_off = 0
-
         # Affichage des températures actuelles
         # prendre les valeurs du dernier record
-        
-        i_last = len(self.data_for_graph_new) - 1
-        self.t_salon = float(self.data_for_graph_new[12][i_last])
-        self.t_bureau = float(self.data_for_graph_new[13][i_last])
-        self.t_ext = float(self.data_for_graph_new[14][i_last])
+        # Les afficheur affichent toujours la dernière valeur mesurée quel que soit l'étendue des courbes affichées
+        i_last = self.id_last_displayed_record
+        self.t_salon = float(self.data_for_graph_new[12][record_dict[i_last]])
+        self.t_bureau = float(self.data_for_graph_new[13][record_dict[i_last]])
+        self.t_ext = float(self.data_for_graph_new[14][record_dict[i_last]])
         # Afficher les valeurs
         # Salon
         self.val_temp_salon.set("".join([str(round(self.t_salon, 1)), "°C"]))
@@ -526,11 +541,13 @@ class Main:
         if not self.zoom_active:
             self.echelle_y_min , self.echelle_y_max, self.graduation_step = self.get_minmax_echelle_y(self.data_for_graph_new)
             
-        print("\nGraph scale ok", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        if self.DEBUG:
+            print("\nSacaling the graph", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
         t_start_mes = datetime.now()
 
         # initialize date and time
-        datetime_start_plot = min(self.data_for_graph_new[22])
+#         datetime_start_plot = min(self.data_for_graph_new[22])
+        datetime_start_plot = self.data_for_graph_new[22][record_dict[self.id_first_displayed_record]]
         datetime_start_plot_str = "".join([str(datetime_start_plot.year),"-",str(datetime_start_plot.month),"-", str(datetime_start_plot.day)," ",
                              str(datetime_start_plot.hour),":",str(datetime_start_plot.minute),":",str(datetime_start_plot.second)]) 
         datetime_obj_start_plot = datetime.strptime(datetime_start_plot_str, '%Y-%m-%d %H:%M:%S')
@@ -618,27 +635,31 @@ class Main:
             h_count += tic_space
 
         # draw the graph
-        n_mes = len(self.data_for_graph_new[0])
+#         n_mes = len(self.data_for_graph_new[0])
+        n_mes = self.id_last_displayed_record - self.id_first_displayed_record + 1
         x_data_to_pix = (self.X_MAX - self.X_MIN) / n_mes
 
-        # find the x scale min and max for the graph
-        no_last_record = len(self.data_for_graph_new) - 1
-        date_start = min(self.data_for_graph_new[22])
-        date_end = max(self.data_for_graph_new[22])
+        # calculate the x scale min and max for the graph
+        no_last_record = record_dict[self.id_last_displayed_record]
+        no_first_record = record_dict[self.id_first_displayed_record]
+        date_start = self.data_for_graph_new[22][record_dict[self.id_first_displayed_record]]
+        date_end = self.data_for_graph_new[22][record_dict[self.id_last_displayed_record]]
         self.echelle_x_min = date_start.timestamp()
         self.echelle_x_max = date_end.timestamp()
+        
         
         # initialize the old_values to 0
 #         old_y_salon, old_y_bureau, old_y_ext, old_y_from_pac, old_y_to_pac, old_y_from_accu, old_y_to_home, old_y_to_boiler, old_y_home_ft, \
 #                  old_y_from_bypass, old_y_boiler_ft, old_y_pac_ft, old_y_from_home, old_y_from_boiler = [0.0 for _ in range(14)]
 #         old_x, old_x,  old_y_onoff = [0.0 for _ in range(3)]
             
-        print("Preparation axes and grids", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        if self.DEBUG:
+            print("Axes and grids placed", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
         t_start_mes = datetime.now()
         
         x_dat = []
         point_size = 3
-        for i in range(len(self.data_for_graph_new[0])):
+        for i in range(len(self.data_for_graph_new[0]) + 1):
             x_dat.append(i * x_data_to_pix + self.V_PADX)
         
         pump_line_width = 5#(self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
@@ -650,25 +671,36 @@ class Main:
             if i_trace < 15:
                 if self.menu_list[i_trace].get():
                     for i_point in range(len(trace)):
-                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0:
+                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
+                           and i_point  >= record_dict[self.id_first_displayed_record] \
+                           and i_point  <= record_dict[self.id_last_displayed_record]: 
+#########################################################
+                            try :
+                                a = x_dat[i_point]
+                            except:
+                                pdb.set_trace()
+#########################################################
+                                
                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
                                 x_new = x_dat[i_point]
                                 y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
                                 self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
                                                          width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
-                                if (x_dat[i_point] - x_old) > 10:
-                                    self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
+#                                 if (x_dat[i_point] - x_old) > 10:
+#                                     self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
                                 x_old = x_dat[i_point]
                                 y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
                         elif i_point == 0:
                             x_old = x_dat[i_point]
                             y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
             
-            # pumps boiler and home
+            # pumps boiler and pump home
             elif i_trace >= 15 and i_trace <= 16:
                 if self.menu_list[i_trace].get():
                     for i_point in range(len(trace)):
-                        if trace[i_point] != -1 and trace[i_point-1] != -1 and i_point > 0:
+                        if trace[i_point] != -1 and trace[i_point-1] != -1 and i_point > 0 \
+                           and i_point  >= record_dict[self.id_first_displayed_record] \
+                           and i_point  <= record_dict[self.id_last_displayed_record]: 
                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
                                 x_new = x_dat[i_point]
                                 y_new = self.Y_MIN - pixels_height_for_states * trace[i_point]
@@ -681,7 +713,9 @@ class Main:
             elif i_trace == 17 :
                 if self.menu_list[i_trace].get():
                     for i_point in range(len(trace)):
-                        if trace[i_point] == 1 and i_point > 0:
+                        if trace[i_point] == 1 and i_point > 0 \
+                           and i_point  >= record_dict[self.id_first_displayed_record] \
+                           and i_point  <= record_dict[self.id_last_displayed_record]: 
                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
                                 x_new = x_dat[i_point]
                                 self.cnv.create_line(x_old, self.Y_MIN + 2.5, x_new, self.Y_MIN + 2.5 , width =pump_line_width, fill = self.menu_color[i_trace])
@@ -693,20 +727,43 @@ class Main:
             elif i_trace == 18 :
                 if self.menu_list[i_trace].get():
                     for i_point in range(len(trace)):
-                        if (trace[i_point] == 1 and i_point > 0):
+                        if (trace[i_point] == 1 and i_point > 0) \
+                           and i_point  >= record_dict[self.id_first_displayed_record] \
+                           and i_point  <= record_dict[self.id_last_displayed_record]: 
                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
                                 x_new = x_dat[i_point]
                                 self.cnv.create_line(x_old, self.Y_MIN + 8, x_new, self.Y_MIN + 8 , width =pump_line_width, fill = self.menu_color[i_trace])
                         else:
                             x_old = x_dat[i_point]
                             
+            elif i_trace > 18 and i_trace < 22:
+                if self.menu_list[i_trace].get():
+                    for i_point in range(len(trace)):
+                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
+                           and i_point  >= record_dict[self.id_first_displayed_record] \
+                           and i_point  <= record_dict[self.id_last_displayed_record]: 
+                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+                                x_new = x_dat[i_point]
+                                y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
+                                                         width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+                                if (x_dat[i_point] - x_old) > 10:
+                                    self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
+                                x_old = x_dat[i_point]
+                                y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                        elif i_point == 0:
+                            x_old = x_dat[i_point]
+                            y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+                            
                 
         
-        print("Plotted curves", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
+        if self.DEBUG:
+            print("Plotted curves", "{0:.3f}".format((datetime.now() - t_start_mes).total_seconds()),"s")
         t_start_mes = datetime.now()
         
         # read the database for data's to append to the graph
         # but stop the changes in the daabase while zoom is active
+        n_row = 0
         if not self.zoom_active:
             
             # read the new(s) record(s) in the database
@@ -715,8 +772,6 @@ class Main:
             # id's bigger than self.id_last_fromdb_record
             n_row = len(read_data)
             n_removed = 0
-
-            p_str = "".join(["passe:", str(self.n_passe), " n_row:", str(n_row)])
             
             if n_row > 0:
 
@@ -761,12 +816,6 @@ class Main:
                 self.id_last_fromdb_record = max(self.data_for_graph_new[23])
                 self.id_last_displayed_record = self.id_last_fromdb_record
             
-            p_str += "".join([" last_id:", str(self.id_last_fromdb_record)])
-#             p_str += "".join([" t_pause:", "{0:.3f}".format(t_pause/1000), "s t_elapsed:", "{0:.3f}".format(t_elapsed/1000), "s"])
-            
-            # if more then one record print a message
-            if n_row > 0 : print(p_str)
-            
             # recreate cursors if exists
             pixels_pro_minute = (self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60
             pixels_shift_left = n_removed * pixels_pro_minute
@@ -781,18 +830,20 @@ class Main:
                 
             self.mouse_cursors_y.clear()
             for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
-                self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+                self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y,
+                                                                 fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
                             
-            self.t_elapsed = datetime.now() - t_start
-            secondes_decimales_str = str(self.t_elapsed).split(".")[1]
-            secondes_decimales_float = float(secondes_decimales_str)/1E6
-            t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
-            t_pause = self.t_pause - t_elapsed
-            
-        print("Pass total time", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s")
+        self.t_elapsed = datetime.now() - t_start
+        secondes_decimales_str = str(self.t_elapsed).split(".")[1]
+        secondes_decimales_float = float(secondes_decimales_str)/1E6
+        t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
+        t_pause = self.t_pause - t_elapsed
+        
+        if self.DEBUG:
+            print("".join(["Pass ", str(self.n_passe), " - new records ", str(n_row),
+                       " - total pass time ", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"s"]))
 
         # pause the program for a while (t_pause) and after that restat it
-        print("".join(["Pass: ", str(self.n_passe), " - new records: ", str(n_row)]))
         self._job = self.tk_root.after(t_pause, self.refresh_display)
 
     def set_x_scale_change(self):
@@ -958,6 +1009,7 @@ class Main:
             self.menu_list[5].set(not self.menu_list[5].get())
             self.menu_list[6].set(not self.menu_list[6].get())
             self.menu_list[7].set(not self.menu_list[7].get())
+            self.menu_list[8].set(not self.menu_list[8].get())
             
         if who == "boiler": 
             self.menu_list[9].set(not self.menu_list[9].get())
@@ -1095,14 +1147,14 @@ class Main:
             
             min_found = False
             max_found = False
-            for row in self.data_from_db:
+            for i_row in range(len(self.data_for_graph_new[23])):
                 
-                if row[22] >= x_min_date and not min_found:
-                    self.id_first_displayed_record = row[23]
+                if self.data_for_graph_new[22][i_row] >= x_min_date and not min_found:
+                    self.id_first_displayed_record = self.data_for_graph_new[23][i_row]
                     min_found = True
                     
-                if row[22] >= x_max_date and not max_found:
-                    self.id_last_displayed_record  = row[23]
+                if self.data_for_graph_new[22][i_row] >= x_max_date and not max_found:
+                    self.id_last_displayed_record = self.data_for_graph_new[23][i_row]
                     max_found = True
             
             y_min_celsius = (self.select_area_y1 - self.Y_MIN) * (self.echelle_y_max - self.echelle_y_min) / (self.Y_MAX - self.Y_MIN) + self.echelle_y_min
@@ -1114,6 +1166,10 @@ class Main:
 
             self.cnv.configure(cursor = "tcross black")
             self.zoom_active = True
+                
+#################################
+#             pdb.set_trace()
+#################################
             
             self.refresh_display()
 
@@ -1227,17 +1283,17 @@ class Main:
                 n = 0.25
         return n
 
-    def get_min_max(self, sensor_data):
-        
-        tmp = []
-        for l in sensor_data:
-            if l != -333:
-                tmp.append(l)
-                
-        y_min = min(tmp)
-        y_max = max(tmp)
-        
-        return [y_min, y_max]
+#     def get_min_max(self, sensor_data):
+#         
+#         tmp = []
+#         for i, l in enumerate(sensor_data):
+#             if l != -333:
+#                 tmp.append(l)
+#                 
+#         y_min = min(tmp)
+#         y_max = max(tmp)
+#         
+#         return [y_min, y_max]
         
 
     # calcul arrondi pour echelle y
@@ -1245,8 +1301,14 @@ class Main:
 
         
         for ix in range(len(graph_data)-2):
-            self.scale_list.append(self.get_min_max(graph_data[ix]))
-#             print(self.get_min_max(graph_data[ix]))
+            tmp = []
+            for ind, val in enumerate(graph_data[ix]):
+                if graph_data[23][ind] >= self.id_first_fromdb_record and graph_data[23][ind] <= self.id_last_fromdb_record:
+                    if val != -333:
+                        tmp.append(val)
+            y_min = min(tmp)
+            y_max = max(tmp)
+            self.scale_list.append([y_min, y_max])
         
         y_min = 9999999
         y_max = -9999999
@@ -1270,7 +1332,7 @@ class Main:
             
         if y_max > 0:
             y_max_ret += graduation_step
-#         print(y_min_ret, y_max_ret, graduation_step)
+
         return y_min_ret, y_max_ret, graduation_step
 
     def rgb_color(self, rgb):
