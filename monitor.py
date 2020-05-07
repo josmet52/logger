@@ -96,7 +96,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 10#.5/24
+        self.NBRE_DAYS_ON_GRAPH = .5/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -665,95 +665,116 @@ class Main:
         pump_line_width = 5#(self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
         pixels_height_for_states = 25
         nbre_pixels_entre_dots = 3
+        x_old = 0
+        
+        for rec_no in range(len(self.data_for_graph_new[0])-1): # pour toutes les mesures des traces
+            x_new = x_dat[rec_no]
+#             print(int(x_old), int(x_new))
+            if (rec_no >= record_dict[self.id_first_displayed_record] and rec_no  <= record_dict[self.id_last_displayed_record]) or rec_no == 0: 
+                for trace_no in range(len(self.data_for_graph_new[0])-1): # pour toutes les traces
+                    if trace_no < 15 and self.menu_list[trace_no].get():
+                        if rec_no != 0:
+                            val_old = self.data_for_graph_new[trace_no][rec_no-1]
+                            val_new = self.data_for_graph_new[trace_no][rec_no]
+                            if val_new != -333 and val_old != -333:                            
+#                                 if (x_dat[rec_no] - x_old) > nbre_pixels_entre_dots:
+                                y_new = y_val_to_pix * (val_new - self.echelle_y_min) + self.Y_MIN
+                                print(int(y_old), int(y_new))
+                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.menu_color[trace_no])
+                                y_old = y_new
+
+#########################################################
+#                             pdb.set_trace()
+#########################################################
+
+                        else:
+                            y_old = y_val_to_pix * (self.data_for_graph_new[trace_no][rec_no] - self.echelle_y_min) + self.Y_MIN
+            x_old = x_new
+                    
+        
         
         # temperatures
-        for i_trace, trace in enumerate(self.data_for_graph_new):
-            if i_trace < 15:
-                if self.menu_list[i_trace].get():
-                    for i_point in range(len(trace)):
-                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
-                           and i_point  >= record_dict[self.id_first_displayed_record] \
-                           and i_point  <= record_dict[self.id_last_displayed_record]: 
-#########################################################
-                            try :
-                                a = x_dat[i_point]
-                            except:
-                                pdb.set_trace()
-#########################################################
-                                
-                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
-                                x_new = x_dat[i_point]
-                                y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
-                                                         width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
-#                                 if (x_dat[i_point] - x_old) > 10:
-#                                     self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
-                                x_old = x_dat[i_point]
-                                y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                        elif i_point == 0:
-                            x_old = x_dat[i_point]
-                            y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#         for i_trace, trace in enumerate(self.data_for_graph_new):
+#             if i_trace < 15:
+#                 if self.menu_list[i_trace].get():
+#                     for i_point in range(len(trace)):
+#                         if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
+#                            and i_point  >= record_dict[self.id_first_displayed_record] \
+#                            and i_point  <= record_dict[self.id_last_displayed_record]: 
+#                                 
+#                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+#                                 x_new = x_dat[i_point]
+#                                 y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#                                 self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
+#                                                          width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+# #                                 if (x_dat[i_point] - x_old) > 10:
+# #                                     self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
+#                                 x_old = x_dat[i_point]
+#                                 y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#                         elif i_point == 0:
+#                             x_old = x_dat[i_point]
+#                             y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
             
             # pumps boiler and pump home
-            elif i_trace >= 15 and i_trace <= 16:
-                if self.menu_list[i_trace].get():
-                    for i_point in range(len(trace)):
-                        if trace[i_point] != -1 and trace[i_point-1] != -1 and i_point > 0 \
-                           and i_point  >= record_dict[self.id_first_displayed_record] \
-                           and i_point  <= record_dict[self.id_last_displayed_record]: 
-                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
-                                x_new = x_dat[i_point]
-                                y_new = self.Y_MIN - pixels_height_for_states * trace[i_point]
-                                self.cnv.create_line(x_new, self.Y_MIN, x_new, y_new, width =pump_line_width, fill = self.menu_color[i_trace])
-                        elif i_point == 0:
-                            x_old = x_dat[i_point]
-                            y_old = self.Y_MIN
+#             elif i_trace >= 15 and i_trace <= 16:
+#                 if self.menu_list[i_trace].get():
+#                     for i_point in range(len(trace)):
+#                         if trace[i_point] != -1 and trace[i_point-1] != -1 and i_point > 0 \
+#                            and i_point  >= record_dict[self.id_first_displayed_record] \
+#                            and i_point  <= record_dict[self.id_last_displayed_record]: 
+#                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+#                                 x_new = x_dat[i_point]
+#                                 y_new = self.Y_MIN - pixels_height_for_states * trace[i_point]
+#                                 self.cnv.create_line(x_new, self.Y_MIN, x_new, y_new, width =pump_line_width, fill = self.menu_color[i_trace])
+#                         elif i_point == 0:
+#                             x_old = x_dat[i_point]
+#                             y_old = self.Y_MIN
                              
             # PAC on-off
-            elif i_trace == 17 :
-                if self.menu_list[i_trace].get():
-                    for i_point in range(len(trace)):
-                        if trace[i_point] == 1 and i_point > 0 \
-                           and i_point  >= record_dict[self.id_first_displayed_record] \
-                           and i_point  <= record_dict[self.id_last_displayed_record]: 
-                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
-                                x_new = x_dat[i_point]
-                                self.cnv.create_line(x_old, self.Y_MIN + 2.5, x_new, self.Y_MIN + 2.5 , width =pump_line_width, fill = self.menu_color[i_trace])
-                        else:
-                            x_old = x_dat[i_point]
+#             elif i_trace == 17 :
+#                 if self.menu_list[i_trace].get():
+#                     for i_point in range(len(trace)):
+#                         if trace[i_point] == 1 and i_point > 0 \
+#                            and i_point  >= record_dict[self.id_first_displayed_record] \
+#                            and i_point  <= record_dict[self.id_last_displayed_record]: 
+#                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+#                                 x_new = x_dat[i_point]
+#                                 self.cnv.create_line(x_old, self.Y_MIN + 2.5, x_new, self.Y_MIN + 2.5 , width =pump_line_width, fill = self.menu_color[i_trace])
+#                         else:
+#                             x_old = x_dat[i_point]
 
 
             # Boiler on-off
-            elif i_trace == 18 :
-                if self.menu_list[i_trace].get():
-                    for i_point in range(len(trace)):
-                        if (trace[i_point] == 1 and i_point > 0) \
-                           and i_point  >= record_dict[self.id_first_displayed_record] \
-                           and i_point  <= record_dict[self.id_last_displayed_record]: 
-                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
-                                x_new = x_dat[i_point]
-                                self.cnv.create_line(x_old, self.Y_MIN + 8, x_new, self.Y_MIN + 8 , width =pump_line_width, fill = self.menu_color[i_trace])
-                        else:
-                            x_old = x_dat[i_point]
+#             elif i_trace == 18 :
+#                 if self.menu_list[i_trace].get():
+#                     for i_point in range(len(trace)):
+#                         if (trace[i_point] == 1 and i_point > 0) \
+#                            and i_point  >= record_dict[self.id_first_displayed_record] \
+#                            and i_point  <= record_dict[self.id_last_displayed_record]: 
+#                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+#                                 x_new = x_dat[i_point]
+#                                 self.cnv.create_line(x_old, self.Y_MIN + 8, x_new, self.Y_MIN + 8 , width =pump_line_width, fill = self.menu_color[i_trace])
+#                         else:
+#                             x_old = x_dat[i_point]
                             
-            elif i_trace > 18 and i_trace < 22:
-                if self.menu_list[i_trace].get():
-                    for i_point in range(len(trace)):
-                        if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
-                           and i_point  >= record_dict[self.id_first_displayed_record] \
-                           and i_point  <= record_dict[self.id_last_displayed_record]: 
-                            if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
-                                x_new = x_dat[i_point]
-                                y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
-                                                         width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
-                                if (x_dat[i_point] - x_old) > 10:
-                                    self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
-                                x_old = x_dat[i_point]
-                                y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
-                        elif i_point == 0:
-                            x_old = x_dat[i_point]
-                            y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#             elif i_trace > 18 and i_trace < 22:
+#                 if self.menu_list[i_trace].get():
+#                     for i_point in range(len(trace)):
+#                         if trace[i_point] != -333 and trace[i_point-1] != -333 and i_point > 0 \
+#                            and i_point  >= record_dict[self.id_first_displayed_record] \
+#                            and i_point  <= record_dict[self.id_last_displayed_record]: 
+#                             if (x_dat[i_point] - x_old) > nbre_pixels_entre_dots:
+#                                 x_new = x_dat[i_point]
+#                                 y_new = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#                                 self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH,
+#                                                          width = self.TRACE_WIDTH, fill = self.menu_color[i_trace])
+#                                 if (x_dat[i_point] - x_old) > 10:
+#                                     self.cnv.create_oval(x_new-point_size, y_new-point_size, x_new+point_size, y_new+point_size, outline = self.menu_color[i_trace])
+#                                 x_old = x_dat[i_point]
+#                                 y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
+#                         elif i_point == 0:
+#                             x_old = x_dat[i_point]
+#                             y_old = y_val_to_pix * (trace[i_point] - self.echelle_y_min) + self.Y_MIN
                             
                 
         
