@@ -461,7 +461,7 @@ class Main:
         timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 3, command = lambda: self.change_days_on_display(2))
         timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 4, command = lambda: self.change_days_on_display(4))
         timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
-        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
+        timemenu.add_radiobutton(label="10 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(10))
         timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
