@@ -59,7 +59,7 @@ class Main:
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
-        self.debug = False
+        self.debug = True
         
         # variables de controle
         self._job = None
@@ -769,7 +769,7 @@ class Main:
             # but not for the first pass because old value are not correct
             if i > 0: 
                 x = i * x_data_to_pix + self.V_PADX
-                if (x - old_x) > 3:
+                if (x - old_x) > 1:
                    
                     # afficheurs
                     if self.display_trace_salon.get() and mes[12] != -333:
@@ -1027,7 +1027,6 @@ class Main:
                 
             for row in self.read_data:
                 self.data_from_db.append(row)
-                p_str += "".join([str(row[0]), "/"])
             
             # adapt the id of the last records
             self.id_last_fromdb_record = self.data_from_db[-1][20]
