@@ -1046,10 +1046,12 @@ class Main:
                 
             self.mouse_cursors_y.clear()
             for mouse_pos_cursor_y in self.mouse_pos_cursors_y:
-                self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y, fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
+                self.mouse_cursors_y.append(self.cnv.create_line(self.X_MIN, mouse_pos_cursor_y, self.X_MAX, mouse_pos_cursor_y,
+                                                                 fill=self.CURSOR_Y_COLOR, dash=(2, 4), width = 2))
 
         if self.debug:
-            print("Total time for the pass", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),"sec", "nouveaux enregistrements", str(n_row), "\n")
+            print("Pass", str(self.n_passe), "total time for this pass", "{0:.3f}".format((datetime.now() - t_start).total_seconds()),
+                  "sec", "nouveaux enregistrements", str(n_row), "\n")
         self._job = self.tk_root.after(t_pause, self.refresh_display)
 
     def set_x_scale_change(self):
