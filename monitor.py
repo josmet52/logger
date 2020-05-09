@@ -44,7 +44,7 @@ class Main:
         16      s11         pump home
         17      s20         pac on-off
         18      s21         boiler on-off
-        19      time_stamp  date tiem acquisition
+        19      time_stamp  date et heure acquisition
         20      id          id du record 
         ------------------------------------------------------------
     """
@@ -53,13 +53,13 @@ class Main:
 
         # version infos
         self.VERSION_NAME = "Monitor" 
-        self.VERSION_NO = "1.00.00" 
-        self.VERSION_DATE = "02.05.2020"
-        self.VERSION_DESCRIPTION = "all features are implemented"
+        self.VERSION_NO = "0.12" 
+        self.VERSION_DATE = "09.05.2020"
+        self.VERSION_DESCRIPTION = "All the functionalities are implemented, still some details to settle and all to test thoroughly"
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
         
-        self.debug = True
+        self.debug = False
         
         # variables de controle
         self._job = None
@@ -96,7 +96,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 10 # 6/24
+        self.NBRE_DAYS_ON_GRAPH = 48/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -463,7 +463,7 @@ class Main:
         timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 3, command = lambda: self.change_days_on_display(2))
         timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 4, command = lambda: self.change_days_on_display(4))
         timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
-        timemenu.add_radiobutton(label="10 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(10))
+        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
         timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
@@ -1005,6 +1005,7 @@ class Main:
         secondes_decimales_float = float(secondes_decimales_str)/1E6
         t_elapsed = int((self.t_elapsed.seconds + secondes_decimales_float) * 1000)
         t_pause = self.t_pause - t_elapsed
+#         print(datetime.now(), "t_pause", t_pause)
         
         if self.debug:
             print("Drawn graphics", "{0:.3f}".format((datetime.now() - t_mes_start).total_seconds()),"s")
@@ -1088,11 +1089,14 @@ class Main:
     def apply_x_scale_change(self, v_choice, ask_window, get_x_min, get_x_max): #, get_graduation_step):
         
         ask_window.destroy()
-        
         # convert the date in the appropriate format
         time_begin_mesure = datetime.strptime(get_x_min, '%Y-%m-%d %H:%M:%S')
         time_end_mesure = datetime.strptime(get_x_max, '%Y-%m-%d %H:%M:%S')
-        self.nbre_hours_on_graph = abs(time_end_mesure - time_begin_mesure).seconds / 3600
+        self.nbre_hours_on_graph = abs(time_end_mesure - time_begin_mesure).total_seconds() / 3600
+        
+###################################################
+#         pdb.set_trace()
+###################################################
 
         # set the default value for the zoom
         self.zoom_active = False
@@ -1109,17 +1113,19 @@ class Main:
                 # values seems to be good so search indexes for min and max
                 min_found = False
                 max_found = False
+                
                 for i, row in enumerate(self.data_from_db):
                     
                     if row[19] >= time_begin_mesure and not min_found:
-                        self.id_first_displayed_record = i
+                        self.id_first_displayed_record = row[20]
                         min_found = True
                         
                     if row[19] >= time_end_mesure and not max_found:
-                        self.id_last_displayed_record  = i
+                        self.id_last_displayed_record  = row[20]
                         max_found = True
                 # set the zoom indicator
                 self.zoom_active = True
+                self.n_passe -= 1
                 # to disable the zooms menus
                 self.refresh_display()
                 
@@ -1181,6 +1187,7 @@ class Main:
         self.cnv.delete("all")
         self.cnv.create_text(int(self.win_width/2.25), int(self.win_height/3), font = self.FONT_TEXT, fill = self.FG_COLOR_WAIT, text = "... loading data ...")
         self.cnv.update()
+        self.n_passe -= 1
         
         # mettre à jour l'affichage
         self.refresh_display()
@@ -1198,6 +1205,7 @@ class Main:
         # vider la mémoire des curseurs y
         self.mouse_pos_cursors_y.clear()
         self.mouse_cursors_y.clear()
+        self.n_passe -= 1
 
         # mettre à jour l'affichage
         self.refresh_data_and_display(nbre_days)
@@ -1308,6 +1316,7 @@ class Main:
                 self.echelle_y_max = get_y_max
                 self.graduation_step = get_graduation_step
                 self.zoom_active = True
+                self.n_passe -= 1
                 self.refresh_display()
             
         elif v_choice == "default":
@@ -1319,6 +1328,7 @@ class Main:
         # reinitialize the params ans the datas and display graph
         self.remove_cursors()
         self.zoom_active = False
+        self.n_passe -= 1
         self.graduation_step = self.get_y_graduation_step(self.echelle_y_min, self.echelle_y_max)
         self.refresh_data_and_display(self.NBRE_DAYS_ON_GRAPH)
 
@@ -1415,6 +1425,7 @@ class Main:
 
             self.cnv.configure(cursor = "tcross black")
             self.zoom_active = True
+            self.n_passe -= 1
             
             self.refresh_display()
 
@@ -1625,7 +1636,7 @@ class Main:
             
                 
         if self.display_trace_pump_boiler.get() or self.display_trace_pump_home.get() or self.display_trace_boiler_on.get() or self.display_trace_pac_on.get():
-            y_min_ret = (y_min // graduation_step) * graduation_step  - 2 * graduation_step
+            y_min_ret = (y_min // graduation_step) * graduation_step  - 1 * graduation_step
             y_max_ret = (y_max // graduation_step) * graduation_step
         else:
             y_min_ret = (y_min // graduation_step) * graduation_step  
@@ -1647,11 +1658,10 @@ class Main:
         
         tk.messagebox.showinfo \
             ("Monitor", "".join([ \
-            "Temperature monitor", "\n\n" \
-            "Version no : ", self.VERSION_NO, " du ", self.VERSION_DATE, "\n", \
-            "Status : ", self.VERSION_STATUS, "\n", \
-            "Author : ", self.VERSION_AUTEUR, "\n\n", \
-            "Note : \n", self.VERSION_DESCRIPTION, "\n"])
+            "Version: ", self.VERSION_NO, " du ", self.VERSION_DATE, "\n", \
+            "Status: ", self.VERSION_STATUS, "\n", \
+            "Author: ", self.VERSION_AUTEUR, "\n\n", \
+            "Note: \n", self.VERSION_DESCRIPTION, "\n"])
             )
 
     def aide(self):
