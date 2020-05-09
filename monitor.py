@@ -96,7 +96,7 @@ class Main:
         self.mysql_logger = Mysql(self.ip_db_server)
 
         # initialisations
-        self.NBRE_DAYS_ON_GRAPH = 2#.5/24
+        self.NBRE_DAYS_ON_GRAPH = .5/24
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
         
         # etendue de l'axe du temps (x)
@@ -547,7 +547,10 @@ class Main:
 
         # initialize date and time
 #         datetime_start_plot = min(self.data_for_graph_new[22])
-        datetime_start_plot = self.data_for_graph_new[22][record_dict[self.id_first_displayed_record]]
+        try:
+            datetime_start_plot = self.data_for_graph_new[22][record_dict[self.id_first_displayed_record]]
+        except:
+            pdb.set_trace()
         datetime_start_plot_str = "".join([str(datetime_start_plot.year),"-",str(datetime_start_plot.month),"-", str(datetime_start_plot.day)," ",
                              str(datetime_start_plot.hour),":",str(datetime_start_plot.minute),":",str(datetime_start_plot.second)]) 
         datetime_obj_start_plot = datetime.strptime(datetime_start_plot_str, '%Y-%m-%d %H:%M:%S')
@@ -662,26 +665,28 @@ class Main:
         for i in range(len(self.data_for_graph_new[0]) + 1):
             x_dat.append(i * x_data_to_pix + self.V_PADX)
         
+        print("x data ok")
         pump_line_width = 5#(self.X_MAX - self.X_MIN) / self.nbre_hours_on_graph / 60 * 1.2
         pixels_height_for_states = 25
-        nbre_pixels_entre_dots = 3
+        nbre_pixels_entre_dots = 1
         x_old = 0
         
         for rec_no in range(len(self.data_for_graph_new[0])-1): # pour toutes les mesures des traces
             x_new = x_dat[rec_no]
+#             print("rec_no", rec_no)
 #             print(int(x_old), int(x_new))
             if (rec_no >= record_dict[self.id_first_displayed_record] and rec_no  <= record_dict[self.id_last_displayed_record]) or rec_no == 0: 
                 for trace_no in range(len(self.data_for_graph_new[0])-1): # pour toutes les traces
                     if trace_no < 15 and self.menu_list[trace_no].get():
+#                         print("trace_no", trace_no)
                         if rec_no != 0:
                             val_old = self.data_for_graph_new[trace_no][rec_no-1]
                             val_new = self.data_for_graph_new[trace_no][rec_no]
-                            if val_new != -333 and val_old != -333:                            
-#                                 if (x_dat[rec_no] - x_old) > nbre_pixels_entre_dots:
-                                y_old = y_val_to_pix * (val_old - self.echelle_y_min) + self.Y_MIN
-                                y_new = y_val_to_pix * (val_new - self.echelle_y_min) + self.Y_MIN
-#                                 print(int(y_old), int(y_new))
-                                self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.menu_color[trace_no])
+                            if val_new != -333 and val_old != -333:
+                                if (x_dat[rec_no] - x_dat[rec_no-1]) > nbre_pixels_entre_dots:
+                                    y_old = y_val_to_pix * (val_old - self.echelle_y_min) + self.Y_MIN
+                                    y_new = y_val_to_pix * (val_new - self.echelle_y_min) + self.Y_MIN
+                                    self.cnv.create_line(x_old, y_old, x_new, y_new + self.TRACE_WIDTH, width = self.TRACE_WIDTH, fill = self.menu_color[trace_no])
 
 #########################################################
 #                             pdb.set_trace()
