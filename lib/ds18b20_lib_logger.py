@@ -21,6 +21,7 @@
 import os
 import glob
 import time
+import sys
 from math import *
 
 class DS18B20:
@@ -36,11 +37,12 @@ class DS18B20:
         base_dir = '/sys/bus/w1/devices/'
         device_folder = glob.glob(base_dir + '28*')
         self._num_devices = len(device_folder)
-        self._device_file = [] 
-        i = 0
-        while i < self._num_devices:
+        self._device_file = []
+        for i in range(self._num_devices):
+#         i = 0
+#         while i < self._num_devices:
             self._device_file.append(device_folder[i] + '/w1_slave')
-            i += 1
+#             i += 1
             
     def _read_temp(self,index):
         # Issue one read to one sensor
@@ -82,8 +84,15 @@ class DS18B20:
         return self._num_devices
     
 if __name__ == '__main__':
+    
     ds18b20 = DS18B20()
+    
     nbre_sensor = ds18b20.device_count()
+    print("Number sensors:", nbre_sensor)
+    if nbre_sensor == 0:
+        print("error: no DS18B20 found")
+        sys.exit(0)
+        
     for i in range(nbre_sensor):
         temp, sensor, ok = ds18b20.tempC(i)
         print("".join(["Sensor:", sensor, " temp:", str(temp), " ", ok]))

@@ -35,12 +35,10 @@ class DS2413:
         base_dir = '/sys/bus/w1/devices/'
         device_folder = glob.glob(base_dir + '3a*')
         self._num_devices = len(device_folder)
-        self._device_file = [] 
-        i = 0
-        while i < self._num_devices:
+        self._device_file : list = [] 
+        
+        for i in range(self._num_devices):
             self._device_file.append(device_folder[i] + '/state')
-            i += 1
-        self.pass_counter = 0
             
     def _read_ds2413(self,index):
         # you should not call this directly
@@ -102,12 +100,12 @@ class DS2413:
 if __name__ == '__main__':
 
     ds2413 = DS2413()
+    
     print("Number devices:", ds2413._num_devices)
     if ds2413._num_devices == 0:
         print("error: no DS2413 found")
         sys.exit(0)
         
-    ds2413.pass_counter += 1
     for i in range(ds2413._num_devices):
         PIOA, PIOB, sensor, status = ds2413.read_ds2413(i)
         if status == 'ok':
