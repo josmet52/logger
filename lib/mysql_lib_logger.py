@@ -110,7 +110,7 @@ class Mysql:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
             tk.messagebox.showerror(msg)
-            logging.warning("DB UNEXPECTED ERROR", msg)
+#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
         
         cur = con.cursor()
@@ -127,7 +127,7 @@ class Mysql:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
             tk.messagebox.showerror(msg)
-            logging.warning("DB UNEXPECTED ERROR", msg)
+#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
         
         cur = con.cursor()
@@ -159,7 +159,7 @@ class Mysql:
             print("get_temp_for_graph -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + " Le programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
             tk.messagebox.showerror("DB UNEXPECTED ERROR", msg)
-            logging.warning("DB UNEXPECTED ERROR", msg)
+#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
             
         cur = con.cursor()
@@ -185,10 +185,10 @@ class Mysql:
                 if connect_try_count == 1:
                     msg = "".join([datetime.strftime(datetime.today(), '%d-%m-%Y %H:%M:%S'), " -> Problème de connection sur la db. Le systeme tente de se reconnecter."])
                     print(msg)
-                    logging.warning(msg)
+#                     logging.warning(msg)
                 msg = " ".join(["-> Essai no:", str(connect_try_count), ":", str(e[0]), "/", str(e[1])])
                 print(msg)
-                logging.warning(msg)
+#                 logging.warning(msg)
                 time.sleep(5)
 
         cur = con.cursor()
