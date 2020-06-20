@@ -10,7 +10,7 @@ import mysql.connector
 
 import tkinter as tk
 from datetime import datetime, timedelta
-# import time
+import time
 
 
 class Mysql:
