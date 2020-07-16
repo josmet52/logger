@@ -70,7 +70,7 @@ class DataLogger:
 
     def run_acquis(self):
         
-        db_connection, err = self.mysql_con.get_db_connexion()
+        db_connection, err = self.mysql_con.get_db_connection()
         pass_count = 1
         if not db_connection :
             while pass_count > 0:
@@ -202,18 +202,10 @@ class DataLogger:
             else:
                 print("".join([datetime.datetime.now().strftime("%Y.%m.%d, %H:%M:%S"), "\n", sensor, " -> ", status]))
                 pass
-
+        # print the status of states sensors
         for i in range (4):
             print(ds2413_ids[i], ds2413_states[i])
         print()
-                
-                                  
-
-
-
-
-
-
 
         print("save the results in the database")
         sql_txt = " ".join([
