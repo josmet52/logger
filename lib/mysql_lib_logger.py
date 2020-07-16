@@ -75,8 +75,8 @@ class Mysql:
         s.connect(("8.8.8.8", 80))
         self.local_ip = s.getsockname()[0]
         s.close()
-        
-        con, e = self.get_db_connexion()
+        # verify the db connection
+        con, e = self.get_db_connection()
         if not con:
             print("mysql_lib_logger : _init_ -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + "\nLe programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
@@ -84,13 +84,12 @@ class Mysql:
             print("DB UNEXPECTED ERROR", msg)
             sys.exit()
             
-    def get_db_connexion(self):
+    def get_db_connection(self):
         
         # verify if the mysql server is ok and the db avaliable
         try:
-            if self.local_ip == self.server_ip: #.split('.')[3]: # if we are on the RPI with mysql server (RPI making temp acquis)
+            if self.local_ip == self.server_ip: # if we are on the RPI with mysql server (RPI making temp acquis)
                 # test the local database connection
-#                 con = mdb.connect(self.host_name, self.database_username, self.database_password, self.database_name)
                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
                 "".join(['Connected on local DB "', self.database_name, '"'])
             else:
@@ -105,12 +104,11 @@ class Mysql:
         
     def get_first_mesured_temperature(self):
       
-        con, e = self.get_db_connexion()
+        con, e = self.get_db_connection()
         if not con:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
             tk.messagebox.showerror(msg)
-#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
         
         cur = con.cursor()
@@ -122,12 +120,11 @@ class Mysql:
         
     def get_last_mesured_temperature(self):
       
-        con, e = self.get_db_connexion()
+        con, e = self.get_db_connection()
         if not con:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
             tk.messagebox.showerror(msg)
-#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
         
         cur = con.cursor()
@@ -153,13 +150,11 @@ class Mysql:
             time_begin_mesure = first_record_in_db
         
         # connect the db and create the cursor to access the database
-      
-        con, e = self.get_db_connexion()
+        con, e = self.get_db_connection()
         if not con:
             print("get_temp_for_graph -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + " Le programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
             tk.messagebox.showerror("DB UNEXPECTED ERROR", msg)
-#             logging.warning("DB UNEXPECTED ERROR", msg)
             exit()
             
         cur = con.cursor()
@@ -180,24 +175,18 @@ class Mysql:
             connect_try_count += 1
             
             # connect the db and return the temperaures not actually on the graph (last_id = last_id on the graph)
-            con, e = self.get_db_connexion()
+            con, e = self.get_db_connection()
             if not con:
                 if connect_try_count == 1:
                     msg = "".join([datetime.strftime(datetime.today(), '%d-%m-%Y %H:%M:%S'), " -> Problème de connection sur la db. Le systeme tente de se reconnecter."])
                     print(msg)
-#                     logging.warning(msg)
                 msg = " ".join(["-> Essai no:", str(connect_try_count), ":", str(e[0]), "/", str(e[1])])
                 print(msg)
-#                 logging.warning(msg)
                 time.sleep(5)
 
         cur = con.cursor()
-#         sql_txt = "".join(["SELECT timeStamp, id, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14 FROM tLog WHERE id > '", str(last_id), "';"])
         sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, s21, time_stamp, id ",
                            "FROM tlog WHERE id > '", str(last_id), "';"])
-#         print(sql_txt)
-        
-
         cur.execute(sql_txt)
         row = cur.fetchall()
         
@@ -206,27 +195,26 @@ class Mysql:
 
 if __name__ == '__main__':
 
-    # ERROR : direct acces to this class is not ok, reason = ????? (21.04.2020 jm)
     mysql_init = Mysql('192.168.1.139')
     ip  = mysql_init.local_ip
-    connexion = mysql_init.get_db_connexion()
+    connection = mysql_init.get_db_connection()
     
-    # verify connexion
-    if connexion:
+    # verify connection
+    if connection:
         print("connected on db server on",ip)
+            
+        # verify mysql_init.get_last_mesured_temperature()
+        data = mysql_init.get_last_mesured_temperature()
+        print(" ".join(["function: get_last_mesured_temperature -->", str(datetime.strptime(str(data[0]), '%Y-%m-%d %H:%M:%S')), "salon=",
+                        str(data[1]), "bureau=", str(data[2]), "exterieur=", str(data[3])]))
         
-    # verify mysql_init.get_last_mesured_temperature()
-    data = mysql_init.get_last_mesured_temperature()
-    print(" ".join(["function: get_last_mesured_temperature -->", str(datetime.strptime(str(data[0]), '%Y-%m-%d %H:%M:%S')), "salon=",
-                    str(data[1]), "bureau=", str(data[2]), "exterieur=", str(data[3])]))
-    
-    # verify mysql_init.get_temp_for_graph()
-    data = mysql_init.get_temp_for_graph(12)
-    print(" ".join(["function: get_temp_for_graph -->", str(len(data)), "records received for 12 hours"]))
-    
-    # verify mysql_init.get_temp_to_complete_graph()
-    data = mysql_init.get_temp_to_complete_graph(1)
-    print(" ".join(["function: get_temp_to_complete_graph --> there is", str(len(data)), "new records"]))
-    
+        # verify mysql_init.get_temp_for_graph()
+        data = mysql_init.get_temp_for_graph(12)
+        print(" ".join(["function: get_temp_for_graph -->", str(len(data)), "records received for 12 hours"]))
+        
+        # verify mysql_init.get_temp_to_complete_graph()
+        data = mysql_init.get_temp_to_complete_graph(1)
+        print(" ".join(["function: get_temp_to_complete_graph --> there is", str(len(data)), "new records"]))
+   
     
     

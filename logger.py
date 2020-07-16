@@ -3,7 +3,7 @@
 """
 logger.py
 reading and saving data from temperature sensors ds18b20 ans state sensors ds2413
-written by Joseph Metrailler in 2016-2018-2020 (pars of code form Adafruit).
+written by Joseph Metrailler in 2016-2018-2020 (parts of code from Adafruit).
 
 --> Acquisition des températures et  états puis enregistrement dans la base de données 
     exécuté à chaque minute 24/24 365/365
@@ -24,10 +24,10 @@ class DataLogger:
     def __init__(self):
         
         # version infos
-        VERSION_NO = "0.01.01" 
-        VERSION_DATE = "21.04.2020"
-        VERSION_DESCRIPTION = "tout au début"
-        VERSION_STATUS = "en développement "
+        VERSION_NO = "0.01.02" 
+        VERSION_DATE = "16.07.2020"
+        VERSION_DESCRIPTION = "petites corrections"
+        VERSION_STATUS = "pilote en test sur RPI0"
         VERSION_AUTEUR = "josmet"
         
         # init times
@@ -113,7 +113,6 @@ class DataLogger:
                 sensor_txt = rows[0][2]
             else: # the sensor dont exist in DB so add it
                 # find the first free place for ds18b20 in sensor table
-            
                 sql_txt = "select sensor_no, sensor_field from tsensor where sensor_type='ds18b20' and sensor_id='' order by sensor_field limit 1;"
                 db_cursor.execute(sql_txt)
                 rows = db_cursor.fetchall()
@@ -130,7 +129,6 @@ class DataLogger:
                         if len(sensor_txt) == 0 :
                             sensor_txt = "New sensor " + str(sensor_field)
                         sensor_num = rows[0][0]
-#                         sensor_num = free_id
                         sensor_field = rows[0][1]
                         
                         # add the new sensor in the database
@@ -187,8 +185,6 @@ class DataLogger:
             PIO[0], PIO[1], sensor, status = self.ds2413_array.read_ds2413(index)
             
             if status == 'ok':
-#                 print("".join([sensor, " PIOA=", str(PIO[0]), " PIOB=", str(PIO[1]), " ", status]))
-                
                 for chanel in range(2):
                     sql_txt = "".join(["select sensor_txt from tsensor where sensor_type='ds2413' and sensor_id='",
                                        sensor, "' and sensor_chanel='", str(chanel), "';"])         

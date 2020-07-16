@@ -14,7 +14,7 @@
    Only one pullup resistor is required
 """
 # ds18b20.py written by Roger Woollett
-# ds2413 .py written by Joseph Metrailler
+# ds2413.py written by Joseph Metrailler
 
 import os
 import glob
