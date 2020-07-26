@@ -75,6 +75,11 @@ class Mysql:
         s.connect(("8.8.8.8", 80))
         self.local_ip = s.getsockname()[0]
         s.close()
+        # calculate the delay time before retray connection
+        ip_s = str(self.local_ip)
+        self.delay_time = int(ip_s[-1:])*2 # delay time is different if the ip is differnet so less conflicts
+        if self.delay_time == 0 : self.delay_time = 10
+        print(self.delay_time)
         # verify the db connection
         con, e = self.get_db_connection()
         if not con:
@@ -91,11 +96,11 @@ class Mysql:
             if self.local_ip == self.server_ip: # if we are on the RPI with mysql server (RPI making temp acquis)
                 # test the local database connection
                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
-                "".join(['Connected on local DB "', self.database_name, '"'])
+#                 "".join(['Connected on local DB "', self.database_name, '"'])
             else:
                 # test the distant database connection
                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
-                "".join(['Connected on distant DB "', self.database_name, '" on "', self.server_ip, '"'])
+#                 "".join(['Connected on distant DB "', self.database_name, '" on "', self.server_ip, '"'])
             return con, sys.exc_info()
         
         except:
@@ -182,7 +187,7 @@ class Mysql:
                     print(msg)
                 msg = " ".join(["-> Essai no:", str(connect_try_count), ":", str(e[0]), "/", str(e[1])])
                 print(msg)
-                time.sleep(5)
+                time.sleep(self.delay_time)
 
         cur = con.cursor()
         sql_txt = "".join(["SELECT t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, s10, s11, s20, s21, time_stamp, id ",
