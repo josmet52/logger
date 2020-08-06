@@ -109,6 +109,8 @@ class Main:
         elif self.NBRE_DAYS_ON_GRAPH == 7: self.nbre_days_on_display.set(5)
         elif self.NBRE_DAYS_ON_GRAPH == 14: self.nbre_days_on_display.set(6)
         elif self.NBRE_DAYS_ON_GRAPH == 30: self.nbre_days_on_display.set(7)
+        elif self.NBRE_DAYS_ON_GRAPH == 90: self.nbre_days_on_display.set(8)
+        elif self.NBRE_DAYS_ON_GRAPH == 365: self.nbre_days_on_display.set(9)
         else: self.nbre_days_on_display.set(2)
 
         self.TRACE_WIDTH = 2
@@ -465,6 +467,8 @@ class Main:
         timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
         timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
         timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
+        timemenu.add_radiobutton(label="90 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 8, command = lambda: self.change_days_on_display(90))
+        timemenu.add_radiobutton(label="365 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 9, command = lambda: self.change_days_on_display(365))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
         # menu courbes de température
