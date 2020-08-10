@@ -11,6 +11,7 @@ import mysql.connector
 import tkinter as tk
 from datetime import datetime, timedelta
 import time
+import pdb
 
 
 class Mysql:
@@ -151,8 +152,12 @@ class Mysql:
         time_begin_mesure = time_end_mesure - timedelta(hours=nbre_hours_on_graph)
         
         first_record_in_db = self.get_first_mesured_temperature()[0]
-        if first_record_in_db > time_begin_mesure:
-            time_begin_mesure = first_record_in_db
+#         if first_record_in_db > time_begin_mesure:
+#             msg = "Le premier enregistrement de la base de donnée est plus récent que la date de début désirée.\n\n"
+#             msg += "La date de début est donc fixée à la date du premier enregistrement."
+#             print(msg)
+#             tk.messagebox.showinfo("Plage de données", msg)
+#             time_begin_mesure = first_record_in_db
         
         # connect the db and create the cursor to access the database
         con, e = self.get_db_connection()
