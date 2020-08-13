@@ -80,7 +80,7 @@ class Mysql:
         ip_s = str(self.local_ip)
         self.delay_time = int(ip_s[-1:])*2 # delay time is different if the ip is differnet so less conflicts
         if self.delay_time == 0 : self.delay_time = 10
-        print(self.delay_time)
+#         print(self.delay_time)
         # verify the db connection
         con, e = self.get_db_connection()
         if not con:
@@ -152,13 +152,18 @@ class Mysql:
         time_begin_mesure = time_end_mesure - timedelta(hours=nbre_hours_on_graph)
         
         first_record_in_db = self.get_first_mesured_temperature()[0]
+        
+################### modif du 10.08.2020 ############################
+# test déplacé dans la procédure refresh_data_and_display()
+#
 #         if first_record_in_db > time_begin_mesure:
 #             msg = "Le premier enregistrement de la base de donnée est plus récent que la date de début désirée.\n\n"
 #             msg += "La date de début est donc fixée à la date du premier enregistrement."
 #             print(msg)
 #             tk.messagebox.showinfo("Plage de données", msg)
 #             time_begin_mesure = first_record_in_db
-        
+####################################################################
+
         # connect the db and create the cursor to access the database
         con, e = self.get_db_connection()
         if not con:

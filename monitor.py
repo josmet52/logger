@@ -48,8 +48,8 @@ class Main:
         20      id          id du record 
         ------------------------------------------------------------
         
-    10.08.2020 version 0.13 : refresh_data_and_display() ->
-                                corrigé date de début si date de début désirée plus petite que date 1er enregistrement db
+    10.08.2020 version 0.13 : refresh_data_and_display() -> corrigé date de début si date de début désirée plus petite que date 1er enregistrement db
+    13.08.2020 version 0.14 : monitor.py et mysql_lib_logger.py -> supprimé les prints inutiles
                                 
     """
     
@@ -57,8 +57,8 @@ class Main:
 
         # version infos
         self.VERSION_NAME = "Monitor" 
-        self.VERSION_NO = "0.13" 
-        self.VERSION_DATE = "09.05.2020"
+        self.VERSION_NO = "0.14" 
+        self.VERSION_DATE = "13.08.2020"
         self.VERSION_DESCRIPTION = "All the functionalities are implemented, still some details to settle and all to test thoroughly"
         self.VERSION_STATUS = "beta"
         self.VERSION_AUTEUR = "Joseph metrailler"
@@ -583,9 +583,11 @@ class Main:
         
         self.NBRE_DAYS_ON_GRAPH = nbre_days
         self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
-        print(self.NBRE_DAYS_ON_GRAPH, self.nbre_hours_on_graph)
+#         print(self.NBRE_DAYS_ON_GRAPH, self.nbre_hours_on_graph)
         
 ################### modif du 10.08.2020 ############################
+# rempace le test dans la procédure get_temp_for_graph()
+
         time_last_mesure = self.mysql_logger.get_last_mesured_temperature()[0]  # pour test on prend la dernière valeur de la base de données
         time_last_mesure_str = "".join([str(time_last_mesure.year),"-",str(time_last_mesure.month),"-", str(time_last_mesure.day)," ",
                              str(time_last_mesure.hour),":",str(time_last_mesure.minute),":",str(time_last_mesure.second)]) 
@@ -595,10 +597,10 @@ class Main:
         first_record_in_db = self.mysql_logger.get_first_mesured_temperature()[0]
         last_record_in_db = self.mysql_logger.get_last_mesured_temperature()[0]
         delta_days = (last_record_in_db - first_record_in_db).days
-        print(first_record_in_db, last_record_in_db, delta_days)
+#         print(first_record_in_db, last_record_in_db, delta_days)
         
         if first_record_in_db > time_begin_mesure:
-            msg = "XXXXXXXXXXX Le premier enregistrement de la base de donnée est plus récent que la date de début désirée.\n\n"
+            msg = "Le premier enregistrement de la base de donnée est plus récent que la date de début désirée.\n\n"
             msg += "La date de début est donc fixée à la date du premier enregistrement."
             tk.messagebox.showinfo("Modification de la plage de données", msg)
             
@@ -607,8 +609,8 @@ class Main:
             self.NBRE_DAYS_ON_GRAPH = delta_days
             self.nbre_hours_on_graph = self.NBRE_DAYS_ON_GRAPH * 24
             
-            print(self.NBRE_DAYS_ON_GRAPH, self.nbre_hours_on_graph)
-#######################
+#             print(self.NBRE_DAYS_ON_GRAPH, self.nbre_hours_on_graph)
+#######################################################################
             
         # read the database for data's for graph
         t_start = datetime.now()
