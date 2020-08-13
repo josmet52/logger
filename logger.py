@@ -7,6 +7,7 @@ written by Joseph Metrailler in 2016-2018-2020 (parts of code from Adafruit).
 
 --> Acquisition des températures et  états puis enregistrement dans la base de données 
     exécuté à chaque minute 24/24 365/365
+    13.08.2020 -> version 1.0.0 -> en service sans problème depuis 3 mois
 """
 
 from lib.ds18b20_lib_logger import DS18B20 # import class DS18B20
@@ -24,10 +25,10 @@ class DataLogger:
     def __init__(self):
         
         # version infos
-        VERSION_NO = "0.01.02" 
-        VERSION_DATE = "16.07.2020"
-        VERSION_DESCRIPTION = "petites corrections"
-        VERSION_STATUS = "pilote en test sur RPI0"
+        VERSION_NO = "1.0.0" 
+        VERSION_DATE = "13.08.2020"
+        VERSION_DESCRIPTION = "en service sans problème depuis 3 mois"
+        VERSION_STATUS = "ok"
         VERSION_AUTEUR = "josmet"
         
         # init times
