@@ -210,13 +210,14 @@ class Mysql:
 
 if __name__ == '__main__':
 
-    mysql_init = Mysql('192.168.1.139')
+    db_server_ip = '192.168.1.139'
+    mysql_init = Mysql(db_server_ip)
     ip  = mysql_init.local_ip
     connection = mysql_init.get_db_connection()
     
     # verify connection
     if connection:
-        print("connected on db server on",ip)
+        print("connected on db server on",db_server_ip)
             
         # verify mysql_init.get_last_mesured_temperature()
         data = mysql_init.get_last_mesured_temperature()
