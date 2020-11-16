@@ -6,6 +6,10 @@
 import socket
 import sys
 from tkinter import messagebox
+import os
+# if os.name == 'nt':
+#     import PyMySQL
+# else:
 import mysql.connector
 
 import tkinter as tk
@@ -80,7 +84,7 @@ class Mysql:
         ip_s = str(self.local_ip)
         self.delay_time = int(ip_s[-1:])*2 # delay time is different if the ip is differnet so less conflicts
         if self.delay_time == 0 : self.delay_time = 10
-#         print(self.delay_time)
+        # print(self.delay_time)
         # verify the db connection
         con, e = self.get_db_connection()
         if not con:

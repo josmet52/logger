@@ -18,7 +18,7 @@ import time
 import datetime
 from tkinter import messagebox
 import sys
-import mysql.connector
+# import mysql.connector
 
 class DataLogger:
     
