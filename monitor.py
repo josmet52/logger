@@ -600,7 +600,7 @@ class Main:
         if delta_days == 0:
             print(first_record_in_db, last_record_in_db, delta_days)
             msg = "La base de données doit contenir 1 jour d'enregistrements avant de pouvoir afficher des courbes."
-            msg += "\n\nRelancer le moniteur dans 24 heures."
+            msg += "\n\nRelancer le moniteur après 24 heures d'acquisitions."
             tk.messagebox.showinfo("Nombre d'enregistrements insuffisant, le moniteur s'arrête", msg)
             exit()
         
