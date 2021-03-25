@@ -597,7 +597,12 @@ class Main:
         first_record_in_db = self.mysql_logger.get_first_mesured_temperature()[0]
         last_record_in_db = self.mysql_logger.get_last_mesured_temperature()[0]
         delta_days = (last_record_in_db - first_record_in_db).days
-#         print(first_record_in_db, last_record_in_db, delta_days)
+        if delta_days == 0:
+            print(first_record_in_db, last_record_in_db, delta_days)
+            msg = "La base de données doit contenir 1 jour d'enregistrements avant de pouvoir afficher des courbes."
+            msg += "\n\nRelancer le moniteur dans 24 heures."
+            tk.messagebox.showinfo("Nombre d'enregistrements insuffisant, le moniteur s'arrête", msg)
+            exit()
         
         if first_record_in_db > time_begin_mesure:
             msg = "Le premier enregistrement de la base de donnée est plus récent que la date de début désirée.\n\n"
