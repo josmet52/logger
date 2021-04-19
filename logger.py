@@ -37,6 +37,7 @@ class DataLogger:
 
         # initialise database access
         mysql_ip = "192.168.1.139"
+        db_name = "logger"
         self.mysql_con = Mysql(mysql_ip)
 
         # initialise temperature sensors
@@ -47,9 +48,12 @@ class DataLogger:
         self.ds2413_array = DS2413()
         self.nbre_ds2413 = self.ds2413_array.device_count()
         
+        # check count_wireless_sensors
+        self.nbre_wireless_ds18b20 = self.count_wireless_ds18b20()
+        
         # no connected sensor -> exit
-        if self.nbre_ds18b20 == 0 and self.nbre_ds2413 == 0:
-            msg = "Aucun capteur détecté. Ajoutez des capteurs de température DS18B20 ou d'état DS2413 puis relancez le programme."
+        if self.nbre_ds18b20 == 0 and self.nbre_ds2413 == 0 and self.nbre_wireless_ds18b20 == 0:
+            msg = "Aucun capteur détecté. Ajoutez des capteurs de température DS18B20 ou d'état DS2413 ou wireless puis relancez le programme."
             title = "Sensors_ERROR"
             print(msg)
             messagebox.showerror(title, msg)
@@ -61,17 +65,77 @@ class DataLogger:
             print(msg)
 
         elif self.nbre_ds18b20 == 0:
-            msg = "Pas de capteurs de température détectés. L'acquisition se poursuit sans mesure de température"
-            title = "DS2413 ERROR"
+            msg = "Pas de capteurs de température détectés. L'acquisition se poursuit sans mesure de température cablée"
+            title = "DS18B20 wired ERROR"
+            print(msg)
+
+        elif self.nbre_wireless_ds18b20 == 0:
+            msg = "Pas de capteurs de température wireless détectés. L'acquisition se poursuit sans mesure de température wireless"
+            title = "DS18b20 wireless ERROR"
             print(msg)
             
-        msg = "".join([str(self.nbre_ds18b20), " capteurs de température DS18B20 détecté(s)", "\n",
+        msg = "".join([str(self.nbre_ds18b20), " capteurs de température DS18B20 cablés détecté(s)\n",
+                       str(self.nbre_wireless_ds18b20), " capteurs de température DS18B20 sans fil détecté(s)\n",
                        str(self.nbre_ds2413), " capteurs d'état détecté(s)"])
         print(msg)
 
+    def count_wireless_ds18b20(self):
+        
+        n_ds18x20_sensors = 0
+        sql_txt = "SELECT sensorid, sensorval FROM reduit"
+        reduit_connection, err = self.mysql_con.get_db_connection("mqtt_reduit")
+        reduit_cursor = reduit_connection.cursor()
+        reduit_cursor.execute(sql_txt)
+        reduit_row = reduit_cursor.fetchall()
+        n_ds18x20_sensors = len(reduit_row)
+        reduit_cursor.close()
+        reduit_connection.close()
+        return n_ds18x20_sensors
+
+    def get_wireless_temp(self):
+        
+        temp_reduit =[]
+        
+        sql_txt = "SELECT sensorid, sensorval FROM reduit"
+        reduit_connection, err = self.mysql_con.get_db_connection("mqtt_reduit")
+        reduit_cursor = reduit_connection.cursor()
+        reduit_cursor.execute(sql_txt)
+        reduit_row = reduit_cursor.fetchall()
+        reduit_cursor.close()
+        reduit_connection.close()
+        
+        db_connection, err = self.mysql_con.get_db_connection("logger")
+        for row in reduit_row:
+            sensor_id = row[0].strip()
+            sensor_temp = row[1]
+            sql_txt = "SELECT id, sensor_txt FROM tsensor WHERE sensor_id = '" + sensor_id + "'"
+            db_cursor = db_connection.cursor()
+            db_cursor.execute(sql_txt)
+            row= db_cursor.fetchall()
+            if len(row) > 0:
+                table_id = row[0][0]
+                sensor_txt = row[0][1]
+                temp_reduit.append([table_id, sensor_id, sensor_txt, sensor_temp])
+        db_cursor.close()
+        db_connection.close()
+        return temp_reduit
+
     def run_acquis(self):
         
-        db_connection, err = self.mysql_con.get_db_connection()
+        # temperatures reduit
+        temp_reduit =[]
+        temp_reduit = self.get_wireless_temp()
+        print("---------------------------------------------------------------")
+        for z in temp_reduit:
+            table_id = z[0]
+            sensor_id = z[1]
+            sensor_txt = z[2]
+            sensor_temp = z[3]
+            print("".join([str(table_id) + ' - ' + str(sensor_id) + ' -> ' + sensor_txt + ' = ' + str(sensor_temp)]))
+        print("---------------------------------------------------------------")
+            
+        # autres températures
+        db_connection, err = self.mysql_con.get_db_connection("logger")
         pass_count = 1
         if not db_connection :
             while pass_count > 0:
@@ -174,7 +238,11 @@ class DataLogger:
                 print("".join([str(sensor_num1+1) + ' - ' + str(ds18b20_ids[sensor_num1]) + ' -> ' + sensor_txt + ' = ' + str(ds18b20_temp[sensor_num1])
                                + ' -> ' + mesure_status, " -> elapsed ", '{0:.2f}'.format(time.time() - t_start_boucle), "s"]))
 
+        # temperatures reduit
 
+
+        # State sensors
+        
         print()
         nbre_max_state_sensors = 3
         ds2413_ids = ['spare'] * nbre_max_state_sensors * 2
@@ -209,12 +277,19 @@ class DataLogger:
         print()
 
         print("save the results in the database")
+#         sql_txt = " ".join([
+#             "INSERT INTO tlog (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, s10, s11, s20, s21, s30, s31) VALUES (", 
+#              str(ds18b20_temp[0]),",",str(ds18b20_temp[1]),",",str(ds18b20_temp[2]),",",str(ds18b20_temp[3]),",",str(ds18b20_temp[4]),",",str(ds18b20_temp[5]),",",
+#              str(ds18b20_temp[6]),",",str(ds18b20_temp[7]),",",str(ds18b20_temp[8]),",",str(ds18b20_temp[9]),",",str(ds18b20_temp[10]),",",
+#              str(ds18b20_temp[11]),",",str(ds18b20_temp[12]),",",str(ds18b20_temp[13]),",",str(ds18b20_temp[14]),",",str(ds18b20_temp[15]),",",
+#              str(ds18b20_temp[16]),",",str(ds18b20_temp[17]),",",str(ds18b20_temp[18]),",",str(ds18b20_temp[19]),",",str(ds18b20_temp[20]),",",
+#              str(ds2413_states[0]),",",str(ds2413_states[1]),",",str(ds2413_states[2]),",",str(ds2413_states[3]),",",str(ds2413_states[4]),",",str(ds2413_states[5]),")"])
         sql_txt = " ".join([
             "INSERT INTO tlog (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, s10, s11, s20, s21, s30, s31) VALUES (", 
              str(ds18b20_temp[0]),",",str(ds18b20_temp[1]),",",str(ds18b20_temp[2]),",",str(ds18b20_temp[3]),",",str(ds18b20_temp[4]),",",str(ds18b20_temp[5]),",",
              str(ds18b20_temp[6]),",",str(ds18b20_temp[7]),",",str(ds18b20_temp[8]),",",str(ds18b20_temp[9]),",",str(ds18b20_temp[10]),",",
-             str(ds18b20_temp[11]),",",str(ds18b20_temp[12]),",",str(ds18b20_temp[13]),",",str(ds18b20_temp[14]),",",str(ds18b20_temp[15]),",",
-             str(ds18b20_temp[16]),",",str(ds18b20_temp[17]),",",str(ds18b20_temp[18]),",",str(ds18b20_temp[19]),",",str(ds18b20_temp[20]),",",
+             str(ds18b20_temp[11]),",",str(ds18b20_temp[12]),",",str(ds18b20_temp[13]),",",str(ds18b20_temp[14]),",",str(temp_reduit[0][3]),",",
+             str(temp_reduit[1][3]),",",str(ds18b20_temp[17]),",",str(ds18b20_temp[18]),",",str(ds18b20_temp[19]),",",str(ds18b20_temp[20]),",",
              str(ds2413_states[0]),",",str(ds2413_states[1]),",",str(ds2413_states[2]),",",str(ds2413_states[3]),",",str(ds2413_states[4]),",",str(ds2413_states[5]),")"])
         db_cursor.execute(sql_txt)
         db_connection.commit()

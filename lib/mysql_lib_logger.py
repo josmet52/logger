@@ -71,7 +71,7 @@ class Mysql:
         
         self.database_username = "pi"  # YOUR MYSQL USERNAME, USUALLY ROOT
         self.database_password = "mablonde"  # YOUR MYSQL PASSWORD
-        self.database_name = "logger"  # YOUR DATABASE NAME
+#         self.database_name = "logger"  # YOUR DATABASE NAME
         self.host_name = "localhost"
         self.server_ip = ip_db_server
         self.record = ""
@@ -97,20 +97,22 @@ class Mysql:
     def get_db_connection(self):
         
         # verify if the mysql server is ok and the db avaliable
-        try:
+#         try:
             if self.local_ip == self.server_ip: # if we are on the RPI with mysql server (RPI making temp acquis)
                 # test the local database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
-#                 "".join(['Connected on local DB "', self.database_name, '"'])
+                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=db_name)
+#                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
+                print("".join(['Connected on local DB "', db_name, '"']))
             else:
                 # test the distant database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
-#                 "".join(['Connected on distant DB "', self.database_name, '" on "', self.server_ip, '"'])
+                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=db_name)
+#                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
+                print("".join(['Connected on distant DB "', db_name, '" on "', self.server_ip, '"']))
             return con, sys.exc_info()
         
-        except:
-            # return error
-            return False, sys.exc_info()
+#         except:
+#             # return error
+#             return False, sys.exc_info()
         
     def get_first_mesured_temperature(self):
       
