@@ -86,7 +86,7 @@ class Mysql:
         if self.delay_time == 0 : self.delay_time = 10
         # print(self.delay_time)
         # verify the db connection
-        con, e = self.get_db_connection()
+        con, e = self.get_db_connection(self.database_name)
         if not con:
             print("mysql_lib_logger : _init_ -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + "\nLe programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
@@ -94,20 +94,20 @@ class Mysql:
             print("DB UNEXPECTED ERROR", msg)
             sys.exit()
             
-    def get_db_connection(self):
+    def get_db_connection(self, db):
         
         # verify if the mysql server is ok and the db avaliable
 #         try:
             if self.local_ip == self.server_ip: # if we are on the RPI with mysql server (RPI making temp acquis)
                 # test the local database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
+                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=db)
 #                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
-                print("".join(['Connected on local DB "', self.database_name, '"']))
+                print("".join(['Connected on local DB "', db, '"']))
             else:
                 # test the distant database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
+                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=db)
 #                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
-                print("".join(['Connected on distant DB "', self.database_name, '" on "', self.server_ip, '"']))
+                print("".join(['Connected on distant DB "', db, '" on "', self.server_ip, '"']))
             return con, sys.exc_info()
         
 #         except:
@@ -116,7 +116,7 @@ class Mysql:
         
     def get_first_mesured_temperature(self):
       
-        con, e = self.get_db_connection()
+        con, e = self.get_db_connection(self.database_name)
         if not con:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
@@ -132,7 +132,7 @@ class Mysql:
         
     def get_last_mesured_temperature(self):
       
-        con, e = self.get_db_connection()
+        con, e = self.get_db_connection(self.database_name)
         if not con:
             print("get_last_mesured_temperature -> DB UNEXPECTED ERROR " + str(e) + " Le programme va s'arrêter")
             msg = "DB UNEXPECTED ERROR", " Erreur innatendue " + str(e) + " Le programme va s'arrêter"
@@ -171,7 +171,7 @@ class Mysql:
 ####################################################################
 
         # connect the db and create the cursor to access the database
-        con, e = self.get_db_connection()
+        con, e = self.get_db_connection(self.database_name)
         if not con:
             print("get_temp_for_graph -> DB UNEXPECTED ERROR\n" + str(e[0]), "/", str(e[1]), "/", str(e[2]) + " Le programme va s'arrêter")
             msg = "".join(["ERROR " + str(e[0]), "/ ", str(e[1]), "/ ", str(e[2]) + "Le programme va s'arrêter"])
@@ -196,7 +196,7 @@ class Mysql:
             connect_try_count += 1
             
             # connect the db and return the temperaures not actually on the graph (last_id = last_id on the graph)
-            con, e = self.get_db_connection()
+            con, e = self.get_db_connection(self.database_name)
             if not con:
                 if connect_try_count == 1:
                     msg = "".join([datetime.strftime(datetime.today(), '%d-%m-%Y %H:%M:%S'), " -> Problème de connection sur la db. Le systeme tente de se reconnecter."])
@@ -219,7 +219,7 @@ if __name__ == '__main__':
     db_server_ip = '192.168.1.139'
     mysql_init = Mysql(db_server_ip)
     ip  = mysql_init.local_ip
-    connection = mysql_init.get_db_connection()
+    connection = mysql_init.get_db_connection(mysql_init.database_name)
     
     # verify connection
     if connection:
