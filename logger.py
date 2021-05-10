@@ -83,7 +83,7 @@ class DataLogger:
         
         n_ds18x20_sensors = 0
         sql_txt = "SELECT sensorid, sensorval FROM reduit"
-        reduit_connection, err = self.mysql_con.get_db_connection("mqtt_reduit")
+        reduit_connection, err = self.mysql_con.get_db_connection("mqtt")
         reduit_cursor = reduit_connection.cursor()
         reduit_cursor.execute(sql_txt)
         reduit_row = reduit_cursor.fetchall()
@@ -97,7 +97,7 @@ class DataLogger:
         temp_reduit =[]
         
         sql_txt = "SELECT sensorid, sensorval FROM reduit"
-        reduit_connection, err = self.mysql_con.get_db_connection("mqtt_reduit")
+        reduit_connection, err = self.mysql_con.get_db_connection("mqtt")
         reduit_cursor = reduit_connection.cursor()
         reduit_cursor.execute(sql_txt)
         reduit_row = reduit_cursor.fetchall()
@@ -288,8 +288,8 @@ class DataLogger:
             "INSERT INTO tlog (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11, t12, t13, t14, t15, t16, t17, t18, t19, t20, s10, s11, s20, s21, s30, s31) VALUES (", 
              str(ds18b20_temp[0]),",",str(ds18b20_temp[1]),",",str(ds18b20_temp[2]),",",str(ds18b20_temp[3]),",",str(ds18b20_temp[4]),",",str(ds18b20_temp[5]),",",
              str(ds18b20_temp[6]),",",str(ds18b20_temp[7]),",",str(ds18b20_temp[8]),",",str(ds18b20_temp[9]),",",str(ds18b20_temp[10]),",",
-             str(ds18b20_temp[11]),",",str(ds18b20_temp[12]),",",str(ds18b20_temp[13]),",",str(ds18b20_temp[14]),",",str(temp_reduit[0][3]),",",
-             str(temp_reduit[1][3]),",",str(ds18b20_temp[17]),",",str(ds18b20_temp[18]),",",str(ds18b20_temp[19]),",",str(ds18b20_temp[20]),",",
+             str(ds18b20_temp[11]),",",str(ds18b20_temp[12]),",",str(ds18b20_temp[13]),",",str(ds18b20_temp[14]),",",str(temp_reduit[1][3]),",",
+             str(temp_reduit[0][3]),",",str(ds18b20_temp[17]),",",str(ds18b20_temp[18]),",",str(ds18b20_temp[19]),",",str(ds18b20_temp[20]),",",
              str(ds2413_states[0]),",",str(ds2413_states[1]),",",str(ds2413_states[2]),",",str(ds2413_states[3]),",",str(ds2413_states[4]),",",str(ds2413_states[5]),")"])
         db_cursor.execute(sql_txt)
         db_connection.commit()
