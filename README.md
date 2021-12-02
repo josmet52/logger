@@ -1,4 +1,4 @@
-# logger
+# logger 
 
 Cette application python tourne sur Raspberry PI pour l'acquisition des données (logger)
 et sur Raspberry ou PC pour l'affichage (monitor). 
