@@ -10,7 +10,8 @@ import os
 # if os.name == 'nt':
 #     import PyMySQL
 # else:
-import mysql.connector
+# import mysql.connector
+import pymysql
 
 import tkinter as tk
 from datetime import datetime, timedelta
@@ -63,9 +64,9 @@ class Mysql:
     def __init__(self, ip_db_server):
         
         # version infos
-        VERSION_NO = "0.01.01" 
-        VERSION_DATE = "23.04.2020"
-        VERSION_DESCRIPTION = "tout au début"
+        VERSION_NO = "0.01.02" 
+        VERSION_DATE = "12.03.2024"
+        VERSION_DESCRIPTION = "usage de pymysql à la place de mysql.connector"
         VERSION_STATUS = "en développement "
         VERSION_AUTEUR = "josmet"
         
@@ -100,13 +101,13 @@ class Mysql:
         try:
             if self.local_ip == self.server_ip: # if we are on the RPI with mysql server (RPI making temp acquis)
                 # test the local database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=db)
-#                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
+                con = pymysql.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=db)
+#                 con = pymysql.connect(user=self.database_username, password=self.database_password, host=self.host_name, database=self.database_name)
 #                 print("".join(['Connected on local DB "', db, '"']))
             else:
                 # test the distant database connection
-                con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=db)
-#                 con = mysql.connector.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
+                con = pymysql.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=db)
+#                 con = pymysql.connect(user=self.database_username, password=self.database_password, host=self.server_ip, database=self.database_name)
 #                 print("".join(['Connected on distant DB "', db, '" on "', self.server_ip, '"']))
             return con, sys.exc_info()
         

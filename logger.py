@@ -36,7 +36,7 @@ class DataLogger:
         self.v_time_begin = time.time() # to calculate elapsed tiem
 
         # initialise database access
-        mysql_ip = "192.168.1.139"
+        mysql_ip = "192.168.1.109"
         db_name = "logger"
         self.mysql_con = Mysql(mysql_ip)
 
