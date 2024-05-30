@@ -468,11 +468,11 @@ class Main:
         timemenu.add_radiobutton(label="1 day", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 2, command = lambda: self.change_days_on_display(1))
         timemenu.add_radiobutton(label="2 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 3, command = lambda: self.change_days_on_display(2))
         timemenu.add_radiobutton(label="4 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 4, command = lambda: self.change_days_on_display(4))
-        timemenu.add_radiobutton(label="7 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
-        timemenu.add_radiobutton(label="14 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
-        timemenu.add_radiobutton(label="30 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
-        timemenu.add_radiobutton(label="90 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 8, command = lambda: self.change_days_on_display(90))
-        timemenu.add_radiobutton(label="365 days", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 9, command = lambda: self.change_days_on_display(365))
+        timemenu.add_radiobutton(label="1 week", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 5, command = lambda: self.change_days_on_display(7))
+        timemenu.add_radiobutton(label="2 weeks", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 6, command = lambda: self.change_days_on_display(14))
+        timemenu.add_radiobutton(label="1 month", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 7, command = lambda: self.change_days_on_display(30))
+        timemenu.add_radiobutton(label="3 months", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 8, command = lambda: self.change_days_on_display(90))
+        timemenu.add_radiobutton(label="1 year", font = self.FONT_LABEL, variable = self.nbre_days_on_display, value = 9, command = lambda: self.change_days_on_display(365))
         menubar.add_cascade(label="X-axis", font = self.FONT_LABEL, menu=timemenu)
         
         # menu courbes de température
@@ -532,9 +532,10 @@ class Main:
         
         # menu database
         databasemenu = Menu(menubar, tearoff=0)
+#         databasemenu.add_radiobutton(label="192.168.1.108", font = self.FONT_LABEL, variable = self.selected_ip, command=lambda: self.select_database_ip("192.168.1.108"))
         databasemenu.add_radiobutton(label="192.168.1.109", font = self.FONT_LABEL, variable = self.selected_ip,  command=lambda: self.select_database_ip("192.168.1.109"))
-        databasemenu.add_radiobutton(label="192.168.1.108", font = self.FONT_LABEL, variable = self.selected_ip, command=lambda: self.select_database_ip("192.168.1.108"))
-#         databasemenu.add_radiobutton(label="192.168.1.142", font = self.FONT_LABEL, variable = self.selected_ip, command=lambda: self.select_database_ip("192.168.1.142"))
+        databasemenu.add_radiobutton(label="192.168.1.110", font = self.FONT_LABEL, variable = self.selected_ip, command=lambda: self.select_database_ip("192.168.1.110"))
+        databasemenu.add_radiobutton(label="192.168.1.143", font = self.FONT_LABEL, variable = self.selected_ip, command=lambda: self.select_database_ip("192.168.1.143"))
         menubar.add_cascade(label="Data sce", font = self.FONT_LABEL, menu=databasemenu)
         
         # menu aide
@@ -1685,7 +1686,8 @@ class Main:
             
         if y_max > 0:
             y_max_ret += graduation_step
-            
+        
+#         return -15, 35, 5
         return y_min_ret, y_max_ret, graduation_step
 
 
